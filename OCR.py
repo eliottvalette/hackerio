@@ -33,7 +33,7 @@ def find_closest_match(word, word_map):
     if not word:
         return ""
     
-    cheat_sheet = {'rtp':'ftp', 'enu': 'gnu', 'urTL': 'url', 'spu': 'gpu', 'Tile': 'file', 'voLa': 'load', 'into': 'info', 'YASS': 'pass', 'Tast' : 'fast'}
+    cheat_sheet = {'rtp':'ftp', 'enu': 'gnu', 'urTL': 'url', 'spu': 'gpu', 'Tile': 'file', 'voLa': 'load', 'into': 'info', 'YASS': 'pass', 'Tast' : 'fast', 'nosaql': 'nosql'}
     
     if word in cheat_sheet.keys():
         print(f"Mot original: '{word}' -> A utilisé la cheat sheet: '{cheat_sheet[word]}'")

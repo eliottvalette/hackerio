@@ -5,7 +5,36 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
-from OCR import extract_text_from_base64_image, save_word_pair
+import json
+from OCR import extract_text_from_base64_image
+
+def save_word_pair(img_src, extracted_text):
+    try:
+        # Read the existing JSON file
+        file_path = "saved-words.json"
+        try:
+            with open(file_path, "r") as file:
+                data = json.load(file)
+        except FileNotFoundError:
+            data = {}
+
+        # Add the new word pair
+        data[img_src] = extracted_text
+
+        # Write back the updated JSON
+        with open(file_path, "w") as file:
+            json.dump(data, file, indent=4)
+    except Exception as e:
+        print(f"Error saving word pair: {e}")
+
+def load_saved_words():
+    """Load the saved words from JSON file"""
+    try:
+        with open('saved-words.json', 'r') as f:
+            return json.load(f)
+    except Exception as e:
+        print(f"Erreur lors du chargement du saved-words.json: {e}")
+        return {}
 
 def open_hacker_io():
     # Initialiser le WebDriver Chrome (assurez-vous que chromedriver est dans le PATH)
@@ -16,6 +45,8 @@ def open_hacker_io():
 
     # Naviguer vers le site cible
     driver.get("https://s0urce.io/")
+
+    saved_words = load_saved_words()
     try:
         # ------------LANCEMENT DU JEU------------
         # Attendre que le champ de saisie soit cliquable et saisir le nom
@@ -68,15 +99,18 @@ def open_hacker_io():
                 word_img = word_to_type_div.find_element(By.TAG_NAME, "img")
                 img_src = word_img.get_attribute("src")
 
-                # Extract text using the OCR module
-                extracted_text = extract_text_from_base64_image(img_src).lower()
-                print(f"Extracted Text: {extracted_text}")
+                if img_src in saved_words.keys():
+                    print(f"Mot déjà sauvegardé ///////////: {saved_words[img_src]}")
+                    extracted_text = saved_words[img_src]
+                else:
+                    # Extract text using the OCR module
+                    extracted_text = extract_text_from_base64_image(img_src).lower()
+                    print(f"Extracted Text: {extracted_text}")
 
                 # ------------TAPER LE MOT EXTRAI--------
                 # Remplacez le sélecteur ci-dessous par celui de votre champ de saisie cible
                 target_input_field = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
                 target_input_field.send_keys(extracted_text)
-                print("Mot extrait tapé dans le champ de saisie.")
 
                 # ------------CLIQUE SUR LE BOUTON "SUBMIT"------------
                 submit_button_xpath = "//button[text()='Enter']"
@@ -96,6 +130,7 @@ def open_hacker_io():
                     save_word_pair(img_src, extracted_text)
                     
                 if fails == 3 :
+                    print('THE END')
                     break
 
                 time.sleep(1)
@@ -117,4 +152,5 @@ def open_hacker_io():
         print("Navigateur fermé.")
 
 if __name__ == "__main__":
-    open_hacker_io()
+    for i in range(10):
+        open_hacker_io()
