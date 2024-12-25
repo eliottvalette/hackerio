@@ -33,19 +33,21 @@ def find_closest_match(word, word_map):
     if not word:
         return ""
     
-    cheat_sheet = {'rtp':'ftp', 'enu': 'gnu', 'urTL': 'url', 'spu': 'gpu', 'Tile': 'file', 'voLa': 'load', 'into': 'info', 'YASS': 'pass', 'Tast' : 'fast', 'nosaql': 'nosql'}
+    # Mistransalted words by OCR replaced by cimputer science words
+    word_map = load_word_map()
     
-    if word in cheat_sheet.keys():
-        print(f"Mot original: '{word}' -> A utilisé la cheat sheet: '{cheat_sheet[word]}'")
-        return cheat_sheet[word]
+    if word in word_map.keys():
+        print(f"Mot original: '{word}' -> A utilisé le word map: '{word_map[word]}'")
+        return word_map[word]
         
     # Get all words from the word map
-    valid_words = list(word_map.keys())
+    valid_words = list(word_map.values())
     
     # Find closest matches
     matches = get_close_matches(word.lower(), valid_words, n=1, cutoff=0.6)
     
     if matches:
+        print(f"Matches: {matches}")
         closest_match = matches[0]
         print(f"Mot original: '{word}' -> Correspondance la plus proche: '{closest_match}'")
         return closest_match
@@ -67,7 +69,7 @@ def extract_text_from_base64_image(base64_string):
         # Load word map
         word_map = load_word_map()
         if not word_map:
-            return ""
+            return "", ""
 
         # Vérifier si la chaîne base64 est une URI de données
         if base64_string.startswith("data:image"):
@@ -82,8 +84,8 @@ def extract_text_from_base64_image(base64_string):
         image = Image.open(io.BytesIO(image_data))
         
         # Effectuer l'OCR avec pytesseract
-        custom_config = '--psm 6 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-        extracted_text = pytesseract.image_to_string(image, config=custom_config)
+        custom_config = '--psm 8 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        extracted_text = pytesseract.image_to_string(image, config=custom_config).lower()
         
         # Nettoyer le texte extrait
         extracted_text = extracted_text.strip()
@@ -92,10 +94,10 @@ def extract_text_from_base64_image(base64_string):
         # Trouver la correspondance la plus proche dans word-map
         matched_word = find_closest_match(extracted_text, word_map)
         
-        return matched_word
+        return matched_word, extracted_text
     except Exception as e:
         print(f"Erreur dans le module OCR: {e}")
-        return ""
+        return "", ""
 
 if __name__ == "__main__":
     # Test with a sample base64 image
