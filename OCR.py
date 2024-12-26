@@ -36,9 +36,9 @@ def find_closest_match(word, word_map):
     # Mistransalted words by OCR replaced by cimputer science words
     word_map = load_word_map()
     
-    if word in word_map.keys():
+    """if word in word_map.keys():
         print(f"Mot original: '{word}' -> A utilisé le word map: '{word_map[word]}'")
-        return word_map[word]
+        return word_map[word]"""
         
     # Get all words from the word map
     valid_words = list(word_map.values())

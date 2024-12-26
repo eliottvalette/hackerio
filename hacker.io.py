@@ -5,16 +5,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from dotenv import load_dotenv
+import os
 import time
 import random
 import json
 from OCR import extract_text_from_base64_image
 
+load_dotenv()
+phone = os.getenv("PHONE")
+password = os.getenv("PASSWORD")
 class HackerIOBot:
     def __init__(self):
         self.driver = None
         self.wait = None
         self.saved_words = self.load_saved_words()
+        self.saved_words_OCR = self.load_saved_words_OCR()
         self.fails = 0
 
     def setup_driver(self):
@@ -33,6 +39,15 @@ class HackerIOBot:
             print(f"Error loading saved-words.json: {e}")
             return {}
 
+    def load_saved_words_OCR(self):
+        """Load previously saved word-image pairs"""
+        try:
+            with open('word-map.json', 'r') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"Error loading word-map.json: {e}")
+            return {}
+
     def save_word_pair(self, img_src, extracted_text):
         """Save successful word-image pairs"""
         try:
@@ -42,14 +57,58 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error saving word pair: {e}")
 
-    def login(self):
+    def save_word_pair_OCR(self, OCR_pred, extracted_text):
+        """Save successful word-image pairs"""
+        try:
+            self.saved_words_OCR[OCR_pred] = extracted_text
+            with open("word-map.json", "w") as file:
+                json.dump(self.saved_words_OCR, file, indent=4)
+        except Exception as e:
+            print(f"Error saving word pair: {e}")
+
+    def login(self, unknown=False):
         """Handle the login process"""
-        name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
-        name_input.send_keys("Los Valettos")
-        
-        play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
-        play_button.click()
-        time.sleep(0.1)
+        if unknown:
+            name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
+            name_input.send_keys("Los Valettos")
+            
+            play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
+            play_button.click()
+        else :
+            login_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+            login_button.click()
+
+            auth_link = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='/auth/twitter']")) )
+            auth_link.click()
+
+            time.sleep(3)
+
+            phone_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
+            phone_input.send_keys(phone)
+
+            next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
+            next_button.click()
+
+            time.sleep(1)
+
+            password_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="password"]')))
+            password_input.send_keys(password)
+
+            login_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Log in']]")))
+            login_button.click()
+
+            time.sleep(3)
+
+            auth_app_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Authorize app']]")))
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", auth_app_button)
+            auth_app_button.click()
+
+            time.sleep(3)
+
+            play_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+            play_button.click()
+
+            time.sleep(1)
 
     def select_target(self):
         """Select a target to hack"""
@@ -243,6 +302,7 @@ class HackerIOBot:
                 else:
                     print("##### SUCCESS #####")
                     self.save_word_pair(img_src, word)
+                    self.save_word_pair_OCR(OCR_result, word)
 
                 if self.fails == 3 :
                     print("##### THE END (LOST) #####")
@@ -328,9 +388,6 @@ class HackerIOBot:
                         self.take_item()
                         self.close_window()
                         self.close_window()
-
-
-
 
                 else:
                     print("Invalid command")
