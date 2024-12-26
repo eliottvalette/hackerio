@@ -1,4 +1,4 @@
-# hacker_io_bot.py
+# hacker_io.py
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -14,7 +14,7 @@ from OCR import extract_text_from_base64_image
 from time import sleep
 
 load_dotenv()
-phone = os.getenv("PHONE")
+email = 'SourceB86129'
 password = os.getenv("PASSWORD")
 class HackerIOBot:
     def __init__(self):
@@ -65,8 +65,8 @@ class HackerIOBot:
 
             time.sleep(3)
 
-            phone_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
-            phone_input.send_keys(phone)
+            email_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
+            email_input.send_keys(email)
 
             next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
             next_button.click()
