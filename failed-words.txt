@@ -1,0 +1,23 @@
+it -- if
+dos -- dos
+sul -- gui
+win -- in
+melee -- delete
+ort -- port
+vola -- load
+ -- 
+atni -- atni
+ -- 
+ -- 
+melene -- delete
+u -- up
+pull -- pull
+op -- pop
+ -- 
+into -- info
+tail -- fail
+tast -- test
+tast -- test
+eriuit -- securityAudit
+bec -- bec
+ort -- port

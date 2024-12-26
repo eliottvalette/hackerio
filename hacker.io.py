@@ -12,9 +12,12 @@ import random
 import json
 from OCR import extract_text_from_base64_image
 from time import sleep
+import math
 
 load_dotenv()
-email = 'SourceB86129'
+username = 'PlayerSafe71889'
+email = 'pefot88659@pixdd.com'
+
 password = os.getenv("PASSWORD")
 class HackerIOBot:
     def __init__(self):
@@ -25,7 +28,25 @@ class HackerIOBot:
 
     def setup_driver(self):
         """Initialize and configure the Chrome WebDriver"""
-        self.driver = webdriver.Chrome()
+        # Create Chrome options
+        chrome_options = webdriver.ChromeOptions()
+        # Disable cache, cookies, and other storage
+        chrome_options.add_argument("--incognito")
+        chrome_options.add_argument("--disable-cache")
+        chrome_options.add_argument("--disable-application-cache")
+        chrome_options.add_argument("--disable-offline-load-stale-cache")
+        chrome_options.add_argument("--disk-cache-size=0")
+        chrome_options.add_argument("--disable-gpu-shader-disk-cache")
+        chrome_options.add_argument("--media-cache-size=0")
+        chrome_options.add_argument("--disable-extensions")
+        # Disable location services
+        chrome_options.add_argument("--disable-geolocation")
+        # Disable various features that could track state
+        chrome_options.add_argument("--disable-notifications")
+        chrome_options.add_argument("--disable-web-security")
+        
+        # Initialize the driver with our options
+        self.driver = webdriver.Chrome(options=chrome_options)
         self.wait = WebDriverWait(self.driver, 2)
         self.driver.maximize_window()
         self.driver.get("https://s0urce.io/")
@@ -48,11 +69,12 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error saving word pair: {e}")
 
-    def login(self, unknown=True):
+    def login(self, unknown=False):
         """Handle the login process"""
         if unknown:
             name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
-            name_input.send_keys("Los Valettos")
+            # Random name with 7 letters
+            name_input.send_keys("".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=7)))
             
             play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
             play_button.click()
@@ -65,13 +87,24 @@ class HackerIOBot:
 
             time.sleep(3)
 
-            email_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
-            email_input.send_keys(email)
+            username_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
+            username_input.send_keys(username)
 
             next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
             next_button.click()
 
-            time.sleep(2)
+            time.sleep(3)
+
+            try :
+                email_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
+                email_input.send_keys(email)
+
+                next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
+                next_button.click()
+            except :
+                pass
+
+            time.sleep(3)
 
             password_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="password"]')))
             password_input.send_keys(password)
@@ -93,42 +126,44 @@ class HackerIOBot:
             time.sleep(1)
 
     def select_target(self):
-        """Select a target to hack"""
+        """Select a target to hack with mouse movement"""
         try:
-            # Wait for any existing windows to be closeable
             time.sleep(0.1)
             
-            # Wait and click target list
+            # Move to and click target list
             target_list = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Target List']")))
-            self.driver.execute_script("arguments[0].click();", target_list)
+            self.simulate_human_mouse_movement(target_list)
+            target_list.click()
             time.sleep(0.1)
 
-            # Wait and click first target
+            # Move to and click random target
             real_target_list = self.wait.until(EC.element_to_be_clickable((By.ID, 'list')))
             targets = real_target_list.find_elements(By.XPATH, "./div")
             random_target = random.choice(targets[:2] + targets[5:])
-            self.driver.execute_script("arguments[0].click();", random_target)
+            self.simulate_human_mouse_movement(random_target)
+            random_target.click()
             
         except Exception as e:
             print(f"Error selecting target: {e}")
             return
 
     def start_hack(self):
-        """Initiate the hacking process"""
+        """Initiate the hacking process with mouse movement"""
         try:
             time.sleep(0.1)
-            # Check if hack button is clickable
             hack_button = self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Hack']")))
             
-            # Check if button has 'cantClick' class
             if 'cantClick' in hack_button.get_attribute("class"):
                 print("Hack button is not clickable (timer active). Skipping...")
                 return False
             
+            # Move to and click hack button
+            self.simulate_human_mouse_movement(hack_button)
             hack_button.click()
             
-            # Try to click port button
+            # Move to and click port button
             port_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Port ')]")))
+            self.simulate_human_mouse_movement(port_button)
             port_button.click()
             time.sleep(0.1)
             return True
@@ -157,23 +192,23 @@ class HackerIOBot:
         sleep(random.uniform(min_delay, max_delay))
 
     def submit_word(self, word):
-        """Submit the word with human-like typing"""
+        """Submit the word with human-like typing and mouse movement"""
         try:
             input_field = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
             
-            # Clear field with random delay
-            input_field.clear()
-            self.random_delay(0.1, 0.2)
+            # Move mouse to input field naturally
+            self.simulate_human_mouse_movement(input_field)
+            input_field.click()
             
-            # Type each character with random delay
+            # Type with variable speed
             for char in word:
                 input_field.send_keys(char)
-                self.random_delay(0.05, 0.15)  # Random delay between keystrokes
-
-            self.random_delay(0.1, 0.2)  # Random delay before hitting enter
+                self.random_delay(0.05, 0.3)
+            
+            # Move to and click submit button
             submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
+            self.simulate_human_mouse_movement(submit_button)
             submit_button.click()
-            self.random_delay(0.1, 0.3)
             
         except Exception as e:
             print(f"Error submitting word: {e}")
@@ -218,34 +253,30 @@ class HackerIOBot:
             raise e
     
     def take_item(self):
-        """Take an item using double-click and ensure it is processed correctly."""
+        """More human-like inventory management"""
         try:
-            time.sleep(0.5)
-            # Check if there are any items first
             items = self.driver.find_elements(By.CLASS_NAME, "name")
             if not items:
-                print("No items found to take")
                 return
-                
-            for item in items:
-                try:
-                    if not item.is_displayed():
-                        continue
-                        
-                    print(f"Taking item: {item.text if item.text else 'Unnamed Item'}")
-                    self.driver.execute_script("arguments[0].scrollIntoView(true);", item)
+            
+            # Don't always take all items
+            num_items = random.randint(1, len(items))
+            selected_items = random.sample(items, num_items)
+            
+            for item in selected_items:
+                # Sometimes hover before clicking
+                if random.random() < 0.3:
                     actions = ActionChains(self.driver)
-                    actions.double_click(item).perform()
-                    time.sleep(0.1)
-                except Exception as e:
-                    print(f"Failed to take item: {e}")
-                    continue
-                    
+                    actions.move_to_element(item)
+                    actions.pause(random.uniform(0.2, 0.8))
+                    actions.perform()
+                
+                self.simulate_human_mouse_movement(item)
+                actions.double_click(item).perform()
+                self.random_delay(0.3, 1.2)
+                
         except Exception as e:
             print(f"Error in take_item: {e}")
-            # Don't raise the error, just log it
-            return
-
 
     def close_window(self):
         """Close the hacking window with improved error handling"""
@@ -287,6 +318,8 @@ class HackerIOBot:
                 old_tries = self.get_current_tries()
                 img_src, word, OCR_result = self.process_word()
                 self.submit_word(word)
+
+                sleep(0.1)
                 new_tries = self.get_current_tries()
 
                 if old_tries > new_tries:
@@ -374,32 +407,32 @@ class HackerIOBot:
                         
                         for _ in range(num_hacks):
                             self.select_target()
-                            self.random_delay(0.3, 0.7)  # Random delay between targets
+                            self.random_delay(0.075, 0.175)  # Random delay between targets (was 0.3, 0.7)
                             
                             if self.start_hack():
                                 self.hack_loop()
                                 print("Hack complete")
-                                self.random_delay(0.5, 1.0)  # Random delay after hack
+                                self.random_delay(0.125, 0.25)  # Random delay after hack (was 0.5, 1.0)
                             else:
                                 print("Skipping to next target...")
                                 self.close_window()
                             
                         # Take rewards and items
                         self.take_all()
-                        self.random_delay(1.0, 2.0)  # Longer delay after taking rewards
+                        self.random_delay(0.25, 0.5)  # Longer delay after taking rewards (was 1.0, 2.0)
                         
                         self.open_inventory()
-                        self.random_delay(0.5, 1.0)
+                        self.random_delay(0.125, 0.25)  # (was 0.5, 1.0)
                         
                         self.take_item()
-                        self.random_delay(0.5, 1.0)
+                        self.random_delay(0.125, 0.25)  # (was 0.5, 1.0)
                         
                         self.close_window()
-                        self.random_delay(0.3, 0.7)
+                        self.random_delay(0.075, 0.175)  # (was 0.3, 0.7)
                         
                         # Add random breaks between sessions
                         if random.random() < 0.2:  # 20% chance of taking a break
-                            break_time = random.uniform(30, 60)
+                            break_time = random.uniform(7.5, 15)  # (was 30, 60)
                             print(f"Taking a break for {break_time:.1f} seconds...")
                             sleep(break_time)
 
@@ -411,6 +444,62 @@ class HackerIOBot:
             if self.driver:
                 self.driver.quit()
                 print("Browser closed due to error")
+
+    def simulate_human_mouse_movement(self, target_element):
+        """Simulate human-like mouse movement to a target element"""
+        try:
+            # Create action chain
+            actions = ActionChains(self.driver)
+            
+            # First move to element (to get current position)
+            actions.move_to_element(target_element)
+            actions.perform()
+            
+            # Get current mouse position
+            current_mouse = self.driver.execute_script(
+                "return {x: arguments[0].screenX, y: arguments[0].screenY}",
+                target_element
+            )
+            
+            # Get element position
+            element_loc = target_element.location
+            
+            # Calculate relative movement needed
+            delta_x = element_loc['x'] - current_mouse['x']
+            delta_y = element_loc['y'] - current_mouse['y']
+            
+            # Create new action chain for curved movement
+            actions = ActionChains(self.driver)
+            
+            # Generate curve points
+            points = []
+            steps = random.randint(5, 10)
+            for i in range(steps):
+                progress = i / steps
+                
+                # Add curve using sine wave
+                curve_x = delta_x * progress + math.sin(progress * math.pi) * random.randint(10, 30)
+                curve_y = delta_y * progress + math.sin(progress * math.pi) * random.randint(10, 30)
+                
+                points.append((curve_x, curve_y))
+            
+            # Execute curved movement
+            for (x, y) in points:
+                actions.move_by_offset(x, y)
+                actions.pause(random.uniform(0.01, 0.05))
+            
+            # Final precise movement to element
+            actions.move_to_element(target_element)
+            actions.pause(random.uniform(0.1, 0.2))
+            actions.perform()
+            
+        except Exception as e:
+            print(f"Error in mouse movement: {e}")
+            # Fallback to direct movement if curved movement fails
+            try:
+                ActionChains(self.driver).move_to_element(target_element).perform()
+            except:
+                pass
 
 if __name__ == "__main__":
     bot = HackerIOBot()

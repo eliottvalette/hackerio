@@ -23,7 +23,6 @@
     "http": "http",
     "temp": "temp",
     "socket": "socket",
-    "load": "load",
     "type": "type",
     "point": "point",
     "net": "net",
@@ -185,7 +184,7 @@
     "enu": "gnu",
     "spu": "gpu",
     "tile": "file",
-    "vola": "load",
+    "load": "load",
     "into": "info",
     "ajyax": "ajax",
     "tree": "free",
@@ -640,5 +639,14 @@
     "nt": "int",
     "ae": "no",
     "mull": "null",
-    "nac": "mac"
+    "nac": "mac",
+    "melee": "root",
+    "iew": "view",
+    "vola": "void",
+    "ew": "view",
+    "tloat": "float",
+    "op": "pop",
+    "savyvye": "save",
+    "pev": "prev",
+    "rtext": "text"
 }
