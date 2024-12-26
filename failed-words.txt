@@ -9,3 +9,7 @@ thiea -- threat
 mutt -- mutt
 ecy -- key
 mutt -- mutt
+ecy -- key
+ntsle -- nosql
+wo -- word
+ort -- port

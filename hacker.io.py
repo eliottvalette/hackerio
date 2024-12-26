@@ -126,31 +126,59 @@ class HackerIOBot:
             time.sleep(1)
 
     def select_target(self):
-        """Select a target to hack"""
+        """Select a valid target to hack based on criteria."""
         try:
-            time.sleep(0.5)  # Wait for animations
+            time.sleep(0.5)
             
             # Click target list
             target_list = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Target List']")))
             self.driver.execute_script("arguments[0].click();", target_list)
             time.sleep(0.5)
             
-            # Select target
+            # Locate targets
             real_target_list = self.wait.until(EC.presence_of_element_located((By.ID, 'list')))
             targets = real_target_list.find_elements(By.XPATH, "./div")
+
+            valid_targets = []
             
-            if targets:
-                # Select a random target from first 3 targets
-                random_target = random.choice(targets[:3])
-                self.driver.execute_script("arguments[0].click();", random_target)
+            # Filter targets
+            for target in targets:
+                target_text = target.text.strip()
+                
+                # Skip empty or irrelevant targets
+                if not target_text:
+                    continue
+                
+                # Split target details
+                target_parts = target_text.split()
+                
+                # Check conditions
+                has_level = target_parts[0].isdigit()  # Check if first part is a level
+                is_npc = "NPC" in target_parts
+                has_cooldown = any("m" in part or "s" in part for part in target_parts)  # Check for cooldown times
+                
+                if has_level and not is_npc and not has_cooldown:
+                    valid_targets.append(target)
+            
+            # Save target details to a file for debugging
+            with open('valid_targets.txt', 'w') as f:
+                for target in valid_targets:
+                    f.write(f"{target.text}\n")
+            
+            # Choose a random valid target
+            if valid_targets:
+                selected_target = random.choice(valid_targets)
+                self.driver.execute_script("arguments[0].click();", selected_target)
+                print(f"Selected target: {selected_target.text}")
                 time.sleep(0.3)
             else:
-                print("No targets found")
+                print("No valid targets found")
                 
         except Exception as e:
             print(f"Error selecting target: {e}")
             # Try to close any open windows
             self.close_window()
+
 
     def start_hack(self):
         """Initiate the hacking process with mouse movement"""
@@ -362,6 +390,7 @@ class HackerIOBot:
                 command = input("\nCommands:\n"
                               "h - Start hack and loop\n"
                               "c - Close window\n"
+                              "s - Select target\n"
                               "r - Take all rewards\n"
                               "a - Activate auto-bot\n"
                               "q - Quit\n"
@@ -380,6 +409,12 @@ class HackerIOBot:
                                 self.close_window()  # Close the target window
                         else:
                             print("Please setup first (s)")
+
+                elif command == 's':
+                    if self.driver:
+                        self.select_target()
+                    else:
+                        print("Please setup first (s)")
 
                 elif command == 'q':
                     if self.driver:
