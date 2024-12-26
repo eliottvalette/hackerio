@@ -19,7 +19,6 @@ class HackerIOBot:
     def __init__(self):
         self.driver = None
         self.wait = None
-        self.saved_words = self.load_saved_words()
         self.saved_words_OCR = self.load_saved_words_OCR()
         self.fails = 0
 
@@ -30,15 +29,6 @@ class HackerIOBot:
         self.driver.set_window_size(820, 1080)
         self.driver.get("https://s0urce.io/")
 
-    def load_saved_words(self):
-        """Load previously saved word-image pairs"""
-        try:
-            with open('saved-words.json', 'r') as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"Error loading saved-words.json: {e}")
-            return {}
-
     def load_saved_words_OCR(self):
         """Load previously saved word-image pairs"""
         try:
@@ -47,15 +37,6 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error loading word-map.json: {e}")
             return {}
-
-    def save_word_pair(self, img_src, extracted_text):
-        """Save successful word-image pairs"""
-        try:
-            self.saved_words[img_src] = extracted_text
-            with open("saved-words.json", "w") as file:
-                json.dump(self.saved_words, file, indent=4)
-        except Exception as e:
-            print(f"Error saving word pair: {e}")
 
     def save_word_pair_OCR(self, OCR_pred, extracted_text):
         """Save successful word-image pairs"""
@@ -89,7 +70,7 @@ class HackerIOBot:
             next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
             next_button.click()
 
-            time.sleep(1)
+            time.sleep(2)
 
             password_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="password"]')))
             password_input.send_keys(password)
@@ -165,10 +146,6 @@ class HackerIOBot:
         word_div = self.wait.until(EC.presence_of_element_located((By.ID, 'word-to-type')))
         word_img = word_div.find_element(By.TAG_NAME, "img")
         img_src = word_img.get_attribute("src")
-
-        if img_src in self.saved_words:
-            print(f"Using saved word: {self.saved_words[img_src]}")
-            return img_src, self.saved_words[img_src], self.saved_words[img_src]
         
         text, OCR_result = extract_text_from_base64_image(img_src)
         print(f"Extracted text: {text}")
@@ -301,7 +278,6 @@ class HackerIOBot:
                     self.fails += 1
                 else:
                     print("##### SUCCESS #####")
-                    self.save_word_pair(img_src, word)
                     self.save_word_pair_OCR(OCR_result, word)
 
                 if self.fails == 3 :
