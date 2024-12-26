@@ -11,6 +11,7 @@ import time
 import random
 import json
 from OCR import extract_text_from_base64_image
+from time import sleep
 
 load_dotenv()
 phone = os.getenv("PHONE")
@@ -26,7 +27,7 @@ class HackerIOBot:
         """Initialize and configure the Chrome WebDriver"""
         self.driver = webdriver.Chrome()
         self.wait = WebDriverWait(self.driver, 2)
-        self.driver.set_window_size(820, 1080)
+        self.driver.maximize_window()
         self.driver.get("https://s0urce.io/")
 
     def load_saved_words_OCR(self):
@@ -47,7 +48,7 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error saving word pair: {e}")
 
-    def login(self, unknown=False):
+    def login(self, unknown=True):
         """Handle the login process"""
         if unknown:
             name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
@@ -151,14 +152,31 @@ class HackerIOBot:
         print(f"Extracted text: {text}")
         return img_src, text, OCR_result
 
-    def submit_word(self, word):
-        """Submit the word and handle the result"""
-        input_field = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
-        input_field.send_keys(word)
+    def random_delay(self, min_delay=0.1, max_delay=0.3):
+        """Add random delay between actions"""
+        sleep(random.uniform(min_delay, max_delay))
 
-        submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
-        submit_button.click()
-        time.sleep(0.1)
+    def submit_word(self, word):
+        """Submit the word with human-like typing"""
+        try:
+            input_field = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
+            
+            # Clear field with random delay
+            input_field.clear()
+            self.random_delay(0.1, 0.2)
+            
+            # Type each character with random delay
+            for char in word:
+                input_field.send_keys(char)
+                self.random_delay(0.05, 0.15)  # Random delay between keystrokes
+
+            self.random_delay(0.1, 0.2)  # Random delay before hitting enter
+            submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
+            submit_button.click()
+            self.random_delay(0.1, 0.3)
+            
+        except Exception as e:
+            print(f"Error submitting word: {e}")
 
     def check_progress(self):
         """Check if hacking is complete"""
@@ -299,7 +317,7 @@ class HackerIOBot:
                 break
 
     def run_interactive(self):
-        """Interactive main method"""
+        """Interactive main method with anti-ban measures"""
         self.setup_driver()
         self.login()
         try:
@@ -349,21 +367,41 @@ class HackerIOBot:
                         print("Please setup first (s)")
                 
                 elif command == 'a':
-                    print("Auto-bot activated")
+                    print("Auto-bot activated with anti-ban measures")
                     while True:
-                        for _ in range(int(10)):
+                        # Random number of hacks per session
+                        num_hacks = random.randint(5, 8)
+                        
+                        for _ in range(num_hacks):
                             self.select_target()
+                            self.random_delay(0.3, 0.7)  # Random delay between targets
+                            
                             if self.start_hack():
                                 self.hack_loop()
                                 print("Hack complete")
+                                self.random_delay(0.5, 1.0)  # Random delay after hack
                             else:
                                 print("Skipping to next target...")
                                 self.close_window()
+                            
+                        # Take rewards and items
                         self.take_all()
+                        self.random_delay(1.0, 2.0)  # Longer delay after taking rewards
+                        
                         self.open_inventory()
+                        self.random_delay(0.5, 1.0)
+                        
                         self.take_item()
+                        self.random_delay(0.5, 1.0)
+                        
                         self.close_window()
-                        self.close_window()
+                        self.random_delay(0.3, 0.7)
+                        
+                        # Add random breaks between sessions
+                        if random.random() < 0.2:  # 20% chance of taking a break
+                            break_time = random.uniform(30, 60)
+                            print(f"Taking a break for {break_time:.1f} seconds...")
+                            sleep(break_time)
 
                 else:
                     print("Invalid command")
