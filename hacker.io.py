@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 import time
 import random
 import json
@@ -64,7 +65,7 @@ class HackerIOBot:
             # Wait and click first target
             real_target_list = self.wait.until(EC.element_to_be_clickable((By.ID, 'list')))
             targets = real_target_list.find_elements(By.XPATH, "./div")
-            random_target = random.choice(targets[:2])
+            random_target = random.choice(targets[:2] + targets[5:])
             self.driver.execute_script("arguments[0].click();", random_target)
             
         except Exception as e:
@@ -74,6 +75,7 @@ class HackerIOBot:
     def start_hack(self):
         """Initiate the hacking process"""
         try:
+            time.sleep(0.1)
             # Check if hack button is clickable
             hack_button = self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Hack']")))
             
@@ -162,16 +164,24 @@ class HackerIOBot:
             raise e
     
     def take_item(self):
-        """Take an item"""
+        """Take an item using double-click and ensure it is processed correctly."""
         try:
+            time.sleep(0.5)
             item = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "name")))
-            print(f"Taking item: {item}")
-            self.driver.execute_script("arguments[0].click();", item)
-            self.driver.execute_script("arguments[0].click();", item)
+            print(f"Taking item: {item.text if item.text else 'Unnamed Item'}")
+            
+            # Scroll into view and double-click
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", item)
+            actions = ActionChains(self.driver)
+            actions.double_click(item).perform()
+            
+            # Wait for the item to disappear or change state
+            self.wait.until(EC.invisibility_of_element(item))
             time.sleep(0.1)
         except Exception as e:
             print(f"Error taking item: {e}")
             raise e
+
 
     def close_window(self):
         """Close the hacking window with improved error handling"""
@@ -252,6 +262,7 @@ class HackerIOBot:
                               "h - Start hack and loop\n"
                               "c - Close window\n"
                               "r - Take all rewards\n"
+                              "a - Activate auto-bot\n"
                               "q - Quit\n"
                               "Enter command: ").lower()
 
@@ -290,6 +301,26 @@ class HackerIOBot:
                         print("All rewards taken")
                     else:
                         print("Please setup first (s)")
+                
+                elif command == 'a':
+                    print("Auto-bot activated")
+                    while True:
+                        for _ in range(int(10)):
+                            self.select_target()
+                            if self.start_hack():
+                                self.hack_loop()
+                                print("Hack complete")
+                            else:
+                                print("Skipping to next target...")
+                                self.close_window()
+                        self.take_all()
+                        self.open_inventory()
+                        self.take_item()
+                        self.close_window()
+                        self.close_window()
+
+
+
 
                 else:
                     print("Invalid command")
