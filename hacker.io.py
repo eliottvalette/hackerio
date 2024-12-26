@@ -48,82 +48,62 @@ class HackerIOBot:
         """Initialize and configure the Chrome WebDriver"""
         chrome_options = webdriver.ChromeOptions()
         
-        # Undetectable Chrome settings
+        # Essential stealth settings
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
-        chrome_options.add_argument('--disable-web-security')
-        chrome_options.add_argument('--allow-running-insecure-content')
-        chrome_options.add_argument('--no-first-run')
-        chrome_options.add_argument('--no-default-browser-check')
+        chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        chrome_options.add_experimental_option('useAutomationExtension', False)
+        
+        # Add more realistic browser settings
+        chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument(f'--window-size={random.randint(1024, 1920)},{random.randint(768, 1080)}')
         chrome_options.add_argument('--start-maximized')
-        chrome_options.add_argument('--disable-extensions')
         
-        # Add random resolution
-        resolution = '1920,1080'
-        chrome_options.add_argument(f'--window-size={resolution}')
+        # Add random user agent
+        user_agent = random.choice(self.chrome_agents)
+        chrome_options.add_argument(f'user-agent={user_agent}')
         
-        # Modify navigator properties
-        chrome_options.add_argument('--disable-features=IsolateOrigins,site-per-process')
+        # Add connection settings
+        chrome_options.add_argument('--disable-application-cache')
+        chrome_options.add_argument('--disable-network-throttling')
+        chrome_options.add_argument('--dns-prefetch-disable')
         
-        # Initialize driver
-        self.driver = webdriver.Chrome(options=chrome_options)
-
-        self.width = self.driver.execute_script("return window.innerWidth;")
-        self.height = self.driver.execute_script("return window.innerHeight;")
-        
-        # Override JavaScript properties
-        self.driver.execute_script("""
-            // Override property getters
-            let properties = [
-                'webdriver',
-                'domAutomation',
-                'domAutomationController',
-                '__webdriverFunc',
-                '__selenium_unwrapped',
-                '__fxdriver_unwrapped',
-                '__driver_evaluate',
-                '__webdriver_evaluate',
-                '__selenium_evaluate',
-                '__fxdriver_evaluate',
-                '__driver_unwrapped',
-                '__webdriver_unwrapped',
-                '__selenium_unwrapped',
-                '__fxdriver_unwrapped',
-                '_Selenium_IDE_Recorder',
-                '_selenium',
-                'calledSelenium',
-                '_WEBDRIVER_ELEM_CACHE'
-            ];
+        try:
+            self.driver = webdriver.Chrome(options=chrome_options)
+            self.wait = WebDriverWait(self.driver, 5)  # Increased timeout
             
-            // Delete all automation properties
-            properties.forEach(prop => {
-                delete Object.getPrototypeOf(navigator)[prop];
-                delete window[prop];
-            });
+            # Set window size
+            self.width = self.driver.execute_script("return window.innerWidth;")
+            self.height = self.driver.execute_script("return window.innerHeight;")
             
-            // Override navigator properties
-            Object.defineProperty(navigator, 'webdriver', {
-                get: () => false,
-                configurable: true
-            });
+            # Add stealth script
+            self.driver.execute_script("""
+                Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                });
+            """)
             
-            // Add noise to navigator
-            Object.defineProperty(navigator, 'hardwareConcurrency', {
-                get: () => Math.floor(Math.random() * 8) + 4
-            });
-            
-            Object.defineProperty(navigator, 'deviceMemory', {
-                get: () => Math.floor(Math.random() * 8) + 4
-            });
-            
-            // Random plugins length
-            Object.defineProperty(navigator, 'plugins', {
-                get: () => new Array(Math.floor(Math.random() * 5) + 1)
-            });
-        """)
-        
-        self.wait = WebDriverWait(self.driver, 2)
-        self.driver.get("https://s0urce.io/")
+            # Try to connect with retry logic
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    self.driver.get("https://s0urce.io/")
+                    # Wait for page to load
+                    self.wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+                    break
+                except Exception as e:
+                    print(f"Connection attempt {attempt + 1} failed: {e}")
+                    if attempt < max_retries - 1:
+                        time.sleep(random.uniform(2, 5))
+                        continue
+                    else:
+                        raise e
+                    
+        except Exception as e:
+            print(f"Error in setup: {e}")
+            if self.driver:
+                self.driver.quit()
+            raise e
 
     def load_saved_words_OCR(self):
         """Load previously saved word-image pairs"""
@@ -146,60 +126,41 @@ class HackerIOBot:
     def login(self, unknown=True):
         """Handle the login process"""
         try:
-            # Random initial delay
-            time.sleep(random.uniform(1, 3))
-            
+            # Initial delay to ensure page is fully loaded
+    time.sleep(2)
+
             if unknown:
-                # Get window dimensions first
-                window_width = self.driver.execute_script("return window.innerWidth;")
-                window_height = self.driver.execute_script("return window.innerHeight;")
-                
-                # Random mouse movements within safe bounds
-                for _ in range(random.randint(2, 5)):
-                    # Keep movements within 80% of window size to avoid bounds issues
-                    safe_width = int(window_width * 0.8)
-                    safe_height = int(window_height * 0.8)
+                # Wait for input field with better error handling
+                try:
+                    name_input = self.wait.until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, 'input[name="input"]'))
+                    )
                     
-                    # Start from center
-                    actions = ActionChains(self.driver)
-                    actions.move_by_offset(safe_width//2, safe_height//2)
+                    # Verify element is actually visible and interactable
+                    if not name_input.is_displayed() or not name_input.is_enabled():
+                        raise Exception("Input field is not visible or enabled")
                     
-                    # Move to random position within safe bounds
-                    x = random.randint(-safe_width//2, safe_width//2)
-                    y = random.randint(-safe_height//2, safe_height//2)
-                    actions.move_by_offset(x, y)
-                    actions.perform()
-                    time.sleep(random.uniform(0.1, 0.3))
-                
-                # Reset mouse position to center
-                actions = ActionChains(self.driver)
-                actions.move_to_element(self.driver.find_element(By.TAG_NAME, "body"))
-                actions.perform()
-                
-                # Generate username
-                username_length = random.randint(6, 12)
-                username = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=username_length))
-                
-                # Find and interact with input
-                name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
-                
-                # Natural typing with mistakes
-                for char in username:
-                    if random.random() < 0.1:  # 10% chance of typo
-                        name_input.send_keys(random.choice('abcdefghijklmnopqrstuvwxyz'))
-                        time.sleep(random.uniform(0.1, 0.2))
-                        name_input.send_keys(Keys.BACKSPACE)
-                        time.sleep(random.uniform(0.1, 0.2))
-                    name_input.send_keys(char)
-                    time.sleep(random.uniform(0.05, 0.15))
-                
-                # Random delay before clicking play
-                time.sleep(random.uniform(0.5, 1.5))
-                
-                play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
-                ActionChains(self.driver).move_to_element(play_button).perform()
-                time.sleep(random.uniform(0.1, 0.3))
-                play_button.click()
+                    # Generate username
+                    username_length = random.randint(6, 12)
+                    username = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz', k=username_length))
+                    
+                    # Type username with natural delays
+                    for char in username:
+                        name_input.send_keys(char)
+                        time.sleep(random.uniform(0.05, 0.15))
+                    
+                    # Wait for play button
+                    play_button = self.wait.until(
+                        EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa"))
+                    )
+                    
+                    # Click play button
+                    play_button.click()
+                    time.sleep(1)  # Wait for login to complete
+                    
+                except Exception as e:
+                    print(f"Error finding or interacting with login elements: {e}")
+                    raise e
                 
         except Exception as e:
             print(f"Error during login: {e}")
@@ -519,9 +480,8 @@ class HackerIOBot:
             viewport_height = self.height / 4
             
             # More varied starting positions
-            rand_offset = random.randint(50, 200)
-            start_x = random.randint(int(target_x - rand_offset), int(target_x + rand_offset))
-            start_y = random.randint(int(target_y - rand_offset), int(target_y + rand_offset))
+            start_x = random.randint(viewport_width / 2, viewport_height / 2)
+            start_y = random.randint(viewport_width / 2, viewport_height / 2)
             
             # Vary movement patterns
             pattern = random.choice(['direct', 'curved', 'zigzag'])
