@@ -20,7 +20,7 @@ class HackerIOBot:
     def setup_driver(self):
         """Initialize and configure the Chrome WebDriver"""
         self.driver = webdriver.Chrome()
-        self.wait = WebDriverWait(self.driver, 15)
+        self.wait = WebDriverWait(self.driver, 2)
         self.driver.set_window_size(820, 1080)
         self.driver.get("https://s0urce.io/")
 
@@ -70,7 +70,7 @@ class HackerIOBot:
             
         except Exception as e:
             print(f"Error selecting target: {e}")
-            raise e
+            return
 
     def start_hack(self):
         """Initiate the hacking process"""
@@ -167,20 +167,30 @@ class HackerIOBot:
         """Take an item using double-click and ensure it is processed correctly."""
         try:
             time.sleep(0.5)
-            item = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "name")))
-            print(f"Taking item: {item.text if item.text else 'Unnamed Item'}")
-            
-            # Scroll into view and double-click
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", item)
-            actions = ActionChains(self.driver)
-            actions.double_click(item).perform()
-            
-            # Wait for the item to disappear or change state
-            self.wait.until(EC.invisibility_of_element(item))
-            time.sleep(0.1)
+            # Check if there are any items first
+            items = self.driver.find_elements(By.CLASS_NAME, "name")
+            if not items:
+                print("No items found to take")
+                return
+                
+            for item in items:
+                try:
+                    if not item.is_displayed():
+                        continue
+                        
+                    print(f"Taking item: {item.text if item.text else 'Unnamed Item'}")
+                    self.driver.execute_script("arguments[0].scrollIntoView(true);", item)
+                    actions = ActionChains(self.driver)
+                    actions.double_click(item).perform()
+                    time.sleep(0.1)
+                except Exception as e:
+                    print(f"Failed to take item: {e}")
+                    continue
+                    
         except Exception as e:
-            print(f"Error taking item: {e}")
-            raise e
+            print(f"Error in take_item: {e}")
+            # Don't raise the error, just log it
+            return
 
 
     def close_window(self):
@@ -235,13 +245,13 @@ class HackerIOBot:
                     self.save_word_pair(img_src, word)
 
                 if self.fails == 3 :
-                    print("##### THE END LOST #####")
+                    print("##### THE END (LOST) #####")
                     self.close_window()
                     self.close_window()
                     break
                     
                 if self.check_progress():
-                    print("##### THE END WON #####")
+                    print("##### THE END (WON) #####")
                     self.close_window()
                     self.close_window()
                     break
