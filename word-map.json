@@ -739,6 +739,6 @@
     "proxyerver": "proxyserver",
     "decryptionkey": "decryptionkey",
     "databreaches": "databreaches",
-    "serverlog" : "serverlog",
+    "serverlog": "serverlog",
     "overclock": "overclock"
 }
