@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import random
 import json
 from OCR import extract_text_from_base64_image
 
@@ -47,35 +48,24 @@ class HackerIOBot:
         
         play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
         play_button.click()
-        time.sleep(0.2)
+        time.sleep(0.1)
 
     def select_target(self):
         """Select a target to hack"""
         try:
             # Wait for any existing windows to be closeable
-            time.sleep(0.2)
-            
-            # Close any open windows first
-            try:
-                close_buttons = self.driver.find_elements(By.CLASS_NAME, 'window-close')
-                for button in close_buttons:
-                    self.driver.execute_script("arguments[0].click();", button)
-            except:
-                pass
+            time.sleep(0.1)
             
             # Wait and click target list
-            target_list = self.wait.until(
-                EC.element_to_be_clickable((By.XPATH, "//div[text()='Target List']"))
-            )
+            target_list = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Target List']")))
             self.driver.execute_script("arguments[0].click();", target_list)
-            time.sleep(0.2)
+            time.sleep(0.1)
 
             # Wait and click first target
-            real_target_list = self.wait.until(
-                EC.element_to_be_clickable((By.ID, 'list'))
-            )
-            first_target = real_target_list.find_element(By.XPATH, "./div[1]")
-            self.driver.execute_script("arguments[0].click();", first_target)
+            real_target_list = self.wait.until(EC.element_to_be_clickable((By.ID, 'list')))
+            targets = real_target_list.find_elements(By.XPATH, "./div")
+            random_target = random.choice(targets[:2])
+            self.driver.execute_script("arguments[0].click();", random_target)
             
         except Exception as e:
             print(f"Error selecting target: {e}")
@@ -83,12 +73,26 @@ class HackerIOBot:
 
     def start_hack(self):
         """Initiate the hacking process"""
-        hack_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Hack']")))
-        hack_button.click()
-
-        port_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Port ')]")))
-        port_button.click()
-        time.sleep(0.2)
+        try:
+            # Check if hack button is clickable
+            hack_button = self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Hack']")))
+            
+            # Check if button has 'cantClick' class
+            if 'cantClick' in hack_button.get_attribute("class"):
+                print("Hack button is not clickable (timer active). Skipping...")
+                return False
+            
+            hack_button.click()
+            
+            # Try to click port button
+            port_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Port ')]")))
+            port_button.click()
+            time.sleep(0.1)
+            return True
+            
+        except Exception as e:
+            print(f"Error starting hack: {e}")
+            return False
 
     def get_current_tries(self):
         """Get the current number of tries left"""
@@ -116,7 +120,7 @@ class HackerIOBot:
 
         submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
         submit_button.click()
-        time.sleep(0.2)
+        time.sleep(0.1)
 
     def check_progress(self):
         """Check if hacking is complete"""
@@ -133,31 +137,73 @@ class HackerIOBot:
             return progress == "100"
         return False
 
-    def close_window(self):
-        """Close the hacking window"""
+    def take_all(self):
+        """Take all the rewards"""
         try:
-            # Wait for the close button and ensure it's clickable
-            close_button = self.wait.until(
-                EC.presence_of_element_located((By.CLASS_NAME, 'window-close'))
-            )
+            take_all_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+            take_all_button.click()
+            time.sleep(0.1)
+        except Exception as e:
+            pass
+
+    def open_inventory(self):
+        """Open the inventory"""
+        try:
+            # Wait for any existing windows to be closeable
+            time.sleep(0.1)
             
-            # Scroll the button into view
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", close_button)
-            
-            # Add a small delay to let the scroll complete
-            time.sleep(0.5)
-            
-            # Try to click using JavaScript if normal click fails
-            try:
-                close_button.click()
-            except:
-                self.driver.execute_script("arguments[0].click();", close_button)
+            # Wait and click target list
+            inventory_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Inventory']")))
+            self.driver.execute_script("arguments[0].click();", inventory_button)
+            time.sleep(0.1)
             
         except Exception as e:
+            print(f"Error selecting target: {e}")
+            raise e
+    
+    def take_item(self):
+        """Take an item"""
+        try:
+            item = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "name")))
+            print(f"Taking item: {item}")
+            self.driver.execute_script("arguments[0].click();", item)
+            self.driver.execute_script("arguments[0].click();", item)
+            time.sleep(0.1)
+        except Exception as e:
+            print(f"Error taking item: {e}")
+            raise e
+
+    def close_window(self):
+        """Close the hacking window with improved error handling"""
+        try:
+            # Wait for any animations to complete
+            time.sleep(0.1)
+            
+            # Find all close buttons and try to close them
+            close_buttons = self.driver.find_elements(By.CLASS_NAME, 'window-close')
+            for button in close_buttons:
+                try:
+                    # Try multiple closing strategies
+                    try:
+                        button.click()
+                    except:
+                        self.driver.execute_script("arguments[0].click();", button)
+                except:
+                    continue
+            
+            # If clicking didn't work, try escape key
+            if len(close_buttons) > 0:
+                from selenium.webdriver.common.keys import Keys
+                webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
+                
+        except Exception as e:
             print(f"Error closing window: {e}")
-            # Try alternative close method using escape key
-            from selenium.webdriver.common.keys import Keys
-            webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
+            # Final fallback - refresh the page
+            try:
+                self.driver.refresh()
+                time.sleep(0.3)
+            except:
+                pass
 
     def hack_loop(self):
         """Main hacking loop"""
@@ -180,19 +226,17 @@ class HackerIOBot:
 
                 if self.fails == 3 :
                     print("##### THE END LOST #####")
-                    # Closes windows while the is windows to close
-                    for _ in range(5):
-                        self.close_window()
+                    self.close_window()
+                    self.close_window()
                     break
                     
                 if self.check_progress():
                     print("##### THE END WON #####")
-                    # Closes windows while the is windows to close
-                    for _ in range(5):
-                        self.close_window()
+                    self.close_window()
+                    self.close_window()
                     break
 
-                time.sleep(0.2)
+                time.sleep(0.1)
 
             except Exception as e:
                 print(f"Error in hack loop: {e}")
@@ -204,24 +248,26 @@ class HackerIOBot:
         self.login()
         try:
             while True:
-                self.select_target()
-                self.start_hack()
-                self.hack_loop()
-                """
                 command = input("\nCommands:\n"
                               "h - Start hack and loop\n"
                               "c - Close window\n"
+                              "r - Take all rewards\n"
                               "q - Quit\n"
                               "Enter command: ").lower()
 
                 if command == 'h':
-                    if self.driver:
-                        self.select_target()
-                        self.start_hack()
-                        self.hack_loop()
-                        print("Hack complete")
-                    else:
-                        print("Please setup first (s)")
+                    number_of_hacks = input("How many hacks to do? ")
+                    for _ in range(int(number_of_hacks)):
+                        if self.driver:
+                            self.select_target()
+                            if self.start_hack():  # Only continue if hack started successfully
+                                self.hack_loop()
+                                print("Hack complete")
+                            else:
+                                print("Skipping to next target...")
+                                self.close_window()  # Close the target window
+                        else:
+                            print("Please setup first (s)")
 
                 elif command == 'q':
                     if self.driver:
@@ -236,9 +282,17 @@ class HackerIOBot:
                     else:
                         print("Please setup first (s)")
 
+                elif command == 'r':
+                    if self.driver:
+                        self.take_all()
+                        self.open_inventory()
+                        self.take_item()
+                        print("All rewards taken")
+                    else:
+                        print("Please setup first (s)")
+
                 else:
                     print("Invalid command")
-                """
 
         except Exception as e:
             print(f"An error occurred: {e}")
