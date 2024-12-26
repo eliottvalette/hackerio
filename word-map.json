@@ -740,5 +740,7 @@
     "decryptionkey": "decryptionkey",
     "databreaches": "databreaches",
     "serverlog": "serverlog",
-    "overclock": "overclock"
+    "overclock": "overclock",
+    "htm": "html",
+    "mutt": "null"
 }

@@ -74,7 +74,7 @@ class HackerIOBot:
         if unknown:
             name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
             # Random name with 7 letters
-            name_input.send_keys("FullTryhard".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=7)))
+            name_input.send_keys("FullTryhard" + "".join(random.choices("abcdefghijklmnopqrstuvwxyz", k=7)))
 
             play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
             play_button.click()
@@ -206,7 +206,7 @@ class HackerIOBot:
             # Type word with delays
             for char in word:
                 input_field.send_keys(char)
-                time.sleep(random.uniform(0.05, 0.15))
+                time.sleep(random.uniform(0.1, 0.2))
             
             # Click submit using JavaScript
             submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
@@ -346,7 +346,7 @@ class HackerIOBot:
                     self.close_window()
                     return
                 
-                time.sleep(0.5)
+                time.sleep(1.5)
                 
             except Exception as e:
                 print(f"Error in hack loop: {e}")
@@ -435,10 +435,9 @@ class HackerIOBot:
                         self.random_delay(0.3, 0.7)  # Original close window delay
                         
                         # Add random breaks between sessions
-                        if random.random() < 0.2:  # 20% chance of taking a break
-                            break_time = random.uniform(30, 60)  # Original break time
-                            print(f"Taking a break for {break_time:.1f} seconds...")
-                            sleep(break_time)
+                        break_time = random.uniform(10, 20)
+                        print(f"Taking a break for {break_time:.1f} seconds...")
+                        sleep(break_time)
 
                 else:
                     print("Invalid command")
