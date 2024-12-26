@@ -187,7 +187,7 @@ class HackerIOBot:
         print(f"Extracted text: {text}")
         return img_src, text, OCR_result
 
-    def random_delay(self, min_delay=0.1, max_delay=0.3):
+    def random_delay(self, min_delay=0.05, max_delay=0.15):
         """Add random delay between actions"""
         sleep(random.uniform(min_delay, max_delay))
 
@@ -203,7 +203,7 @@ class HackerIOBot:
             # Type with variable speed
             for char in word:
                 input_field.send_keys(char)
-                self.random_delay(0.05, 0.3)
+                self.random_delay(0.05, 0.15)
             
             # Move to and click submit button
             submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
@@ -451,29 +451,30 @@ class HackerIOBot:
             # Create action chain
             actions = ActionChains(self.driver)
             
-            # First move to element (to get current position)
-            actions.move_to_element(target_element)
-            actions.perform()
-            
-            # Get current mouse position
-            current_mouse = self.driver.execute_script(
-                "return {x: arguments[0].screenX, y: arguments[0].screenY}",
-                target_element
-            )
-            
-            # Get element position
+            # Get element position and size
             element_loc = target_element.location
+            size = target_element.size
             
-            # Calculate relative movement needed
-            delta_x = element_loc['x'] - current_mouse['x']
-            delta_y = element_loc['y'] - current_mouse['y']
+            # Calculate target center
+            target_x = element_loc['x'] + size['width'] / 2
+            target_y = element_loc['y'] + size['height'] / 2
             
-            # Create new action chain for curved movement
-            actions = ActionChains(self.driver)
+            # Get viewport size
+            viewport_width = self.driver.execute_script("return window.innerWidth;")
+            viewport_height = self.driver.execute_script("return window.innerHeight;")
+            
+            # Start from a random position within the viewport
+            start_x = random.randint(0, viewport_width)
+            start_y = random.randint(0, viewport_height)
+            
+            # Calculate movement needed
+            delta_x = target_x - start_x
+            delta_y = target_y - start_y
             
             # Generate curve points
             points = []
             steps = random.randint(5, 10)
+            
             for i in range(steps):
                 progress = i / steps
                 
@@ -481,7 +482,7 @@ class HackerIOBot:
                 curve_x = delta_x * progress + math.sin(progress * math.pi) * random.randint(10, 30)
                 curve_y = delta_y * progress + math.sin(progress * math.pi) * random.randint(10, 30)
                 
-                points.append((curve_x, curve_y))
+                points.append((curve_x / steps, curve_y / steps))
             
             # Execute curved movement
             for (x, y) in points:

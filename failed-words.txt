@@ -21,3 +21,8 @@ tast -- test
 eriuit -- securityAudit
 bec -- bec
 ort -- port
+ylov -- ylov
+linux -- linux
+ylov -- ylov
+eriui -- eriui
+tni -- tni
