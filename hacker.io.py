@@ -40,8 +40,6 @@ class HackerIOBot:
             # Set full screen
             self.driver.maximize_window()
 
-
-
             self.driver.get("https://s0urce.io/")
             
             # Get window dimensions
@@ -99,7 +97,7 @@ class HackerIOBot:
             next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
             next_button.click()
 
-            time.sleep(3)
+            time.sleep(6)
 
             try :
                 email_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
