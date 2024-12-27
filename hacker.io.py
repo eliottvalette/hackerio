@@ -16,8 +16,8 @@ import math
 from selenium.webdriver.safari.options import Options
 
 load_dotenv()
-username = 'ESpeculos3749'
-email = 'heteho5137@pixdd.com'
+username = 'NeverGiveU79678'
+email = 'jihop22591@myweblaw.com'
 
 password = os.getenv("PASSWORD")
 class HackerIOBot:
@@ -35,15 +35,20 @@ class HackerIOBot:
             
             # Initialize Safari driver
             self.driver = webdriver.Safari()
-            self.wait = WebDriverWait(self.driver, 5)
+            self.wait = WebDriverWait(self.driver, 2)
             
-            # Set window size
+            # Set full screen
             self.driver.maximize_window()
+
+
+
             self.driver.get("https://s0urce.io/")
             
             # Get window dimensions
             self.width = self.driver.execute_script("return window.innerWidth;")
             self.height = self.driver.execute_script("return window.innerHeight;")
+
+            time.sleep(3)
             
         except Exception as e:
             print(f"Error in setup: {e}")
@@ -69,7 +74,7 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error saving word pair: {e}")
 
-    def login(self, unknown=True):
+    def login(self, unknown=False):
         """Handle the login process"""
         if unknown:
             name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
@@ -79,13 +84,14 @@ class HackerIOBot:
             play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
             play_button.click()
         else :
+            time.sleep(3)
             login_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
             login_button.click()
 
             auth_link = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='/auth/twitter']")) )
             auth_link.click()
 
-            time.sleep(3)
+            time.sleep(6)
 
             username_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
             username_input.send_keys(username)
@@ -118,12 +124,22 @@ class HackerIOBot:
             self.driver.execute_script("arguments[0].scrollIntoView(true);", auth_app_button)
             auth_app_button.click()
 
-            time.sleep(3)
+            time.sleep(5)
+
+            self.close_window()
 
             play_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
             play_button.click()
 
             time.sleep(1)
+    
+    def click_green_button(self):
+        """Click the green button"""
+        try:
+            green_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+            green_button.click()
+        except Exception as e:
+            print(f"Error clicking green button: {e}")
 
     def select_target(self):
         """Select a valid target to hack based on criteria."""
@@ -156,8 +172,9 @@ class HackerIOBot:
                 has_level = target_parts[0].isdigit()  # Check if first part is a level
                 is_npc = "NPC" in target_parts
                 has_cooldown = any("m" in part or "s" in part for part in target_parts)  # Check for cooldown times
+                is_you = "(you)" in target_parts
                 
-                if has_level and not is_npc and not has_cooldown:
+                if has_level and not is_npc and not has_cooldown and not is_you:
                     valid_targets.append(target)
             
             # Save target details to a file for debugging
@@ -165,9 +182,26 @@ class HackerIOBot:
                 for target in valid_targets:
                     f.write(f"{target.text}\n")
             
-            # Choose a random valid target
+            # Choose NPC target, if not select the one with the lowest level
             if valid_targets:
-                selected_target = random.choice(valid_targets)
+                # Sort targets by NPC status and level
+                def get_target_level(target):
+                    parts = target.text.strip().split()
+                    try:
+                        return (0 if "NPC" in parts else 1, int(parts[0]))
+                    except:
+                        return (1, 999)  # High number for invalid levels
+                
+                # Sort targets: NPCs first, then by level
+                valid_targets.sort(key=get_target_level)
+                
+                # Select first target (NPC or lowest level)
+                if valid_targets[0].text.strip().split()[1] == 'NPC':
+                    selected_target = valid_targets[0]
+                else:
+                    selected_target = random.choice(valid_targets[:5])
+
+            if selected_target:
                 self.driver.execute_script("arguments[0].click();", selected_target)
                 print(f"Selected target: {selected_target.text}")
                 time.sleep(0.3)
@@ -181,25 +215,36 @@ class HackerIOBot:
 
 
     def start_hack(self):
-        """Initiate the hacking process with mouse movement"""
+        """Initiate the hacking process"""
         try:
-            time.sleep(0.1)
+            time.sleep(0.5)  # Increased wait time
+            
+            # Find and click hack button
             hack_button = self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Hack']")))
-
+            
             if 'cantClick' in hack_button.get_attribute("class"):
                 print("Hack button is not clickable (timer active). Skipping...")
                 return False
-
-            # Move to and click hack button
-            self.simulate_human_mouse_movement(hack_button)
-            hack_button.click()
-
-            # Move to and click port button
-            port_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(), 'Port ')]")))
-            self.simulate_human_mouse_movement(port_button)
-            port_button.click()
-            time.sleep(0.1)
-            return True
+            
+            # Click hack button using JavaScript
+            self.driver.execute_script("arguments[0].click();", hack_button)
+            time.sleep(0.5)  # Wait for animation
+            
+            # Find and click port button
+            try:
+                port_button = self.wait.until(EC.element_to_be_clickable(
+                    (By.XPATH, "//button[contains(text(), 'Port ')]")
+                ))
+                self.driver.execute_script("arguments[0].click();", port_button)
+                time.sleep(0.3)
+                
+                # Verify hack window is open
+                self.wait.until(EC.presence_of_element_located((By.ID, 'word-to-type')))
+                return True
+                
+            except Exception as e:
+                print(f"Error clicking port button: {e}")
+                return False
 
         except Exception as e:
             print(f"Error starting hack: {e}")
@@ -312,73 +357,86 @@ class HackerIOBot:
     def close_window(self):
         """Close the hacking window with improved error handling"""
         try:
-            # Wait for any animations to complete
-            time.sleep(0.1)
+            time.sleep(0.5)  # Increased wait time
 
-            # Find all close buttons and try to close them
-            close_buttons = self.driver.find_elements(By.CLASS_NAME, 'window-close')
-            for button in close_buttons:
-                try:
-                    # Try multiple closing strategies
-                    try:
-                        button.click()
-                    except:
-                        self.driver.execute_script("arguments[0].click();", button)
-                except:
-                    continue
-
-            # If clicking didn't work, try escape key
-            if len(close_buttons) > 0:
-                from selenium.webdriver.common.keys import Keys
-                webdriver.ActionChains(self.driver).send_keys(Keys.ESCAPE).perform()
-
-        except Exception as e:
-            print(f"Error closing window: {e}")
-            # Final fallback - refresh the page
+            # Try to find and click 'Ok, cool' button first
             try:
-                self.driver.refresh()
+                ok_cool_button = self.driver.find_element(By.XPATH, "//button[text()='Ok, cool']")
+                self.driver.execute_script("arguments[0].click();", ok_cool_button)
                 time.sleep(0.3)
             except:
                 pass
+
+            # Find and close all windows
+            close_buttons = self.driver.find_elements(By.CLASS_NAME, 'window-close')
+            for button in close_buttons:
+                try:
+                    self.driver.execute_script("arguments[0].click();", button)
+                    time.sleep(0.3)
+                except:
+                    continue
+
+        except Exception as e:
+            print(f"Error closing window: {e}")
 
     def hack_loop(self):
         """Main hacking loop"""
         self.fails = 0
         while True:
             try:
-                old_tries = self.get_current_tries()
-                img_src, word, OCR_result = self.process_word()
+                # Try to handle 'Ok, cool' button if present
+                try:
+                    ok_cool_button = self.driver.find_element(By.XPATH, "//button[text()='Ok, cool']")
+                    self.driver.execute_script("arguments[0].click();", ok_cool_button)
+                    time.sleep(0.3)
+                except:
+                    pass
                 
-                # Submit word and wait for result
-                self.submit_word(word)
-                time.sleep(1)
+                # Get current tries
+                try:
+                    old_tries = self.get_current_tries()
+                except:
+                    print("Could not get current tries, exiting hack loop")
+                    return
                 
-                new_tries = self.get_current_tries()
+                # Process word and submit
+                try:
+                    img_src, word, OCR_result = self.process_word()
+                    self.submit_word(word)
+                    time.sleep(1)
+                    
+                    new_tries = self.get_current_tries()
+                    
+                    if old_tries > new_tries:
+                        print("##### FAILED #####")
+                        with open('failed-words.txt', 'a') as f:
+                            f.write(f"{OCR_result} -- {word}\n")
+                        self.fails += 1
+                    else:
+                        print("##### SUCCESS #####")
+                        self.save_word_pair_OCR(OCR_result, word)
+                except Exception as e:
+                    print(f"Error in word processing/submission: {e}")
+                    return
                 
-                if old_tries > new_tries:
-                    print("##### FAILED #####")
-                    with open('failed-words.txt', 'a') as f:
-                        f.write(f"{OCR_result} -- {word}\n")
-                    self.fails += 1
-                else:
-                    print("##### SUCCESS #####")
-                    self.save_word_pair_OCR(OCR_result, word)
-                
+                # Check end conditions
                 if self.fails == 3:
                     print("##### THE END (LOST) #####")
                     self.close_window()
                     return
                 
-                if self.check_progress():
-                    print("##### THE END (WON) #####")
-                    self.close_window()
-                    return
+                try:
+                    if self.check_progress():
+                        print("##### THE END (WON) #####")
+                        self.close_window()
+                        return
+                except:
+                    pass
                 
                 time.sleep(1.5)
                 
             except Exception as e:
                 print(f"Error in hack loop: {e}")
-                self.close_window()
                 return
 
     def run_interactive(self):
@@ -438,6 +496,12 @@ class HackerIOBot:
                     else:
                         print("Please setup first (s)")
 
+                elif command =='g':
+                    if self.driver:
+                        self.click_green_button()
+                    else:
+                        print("Please setup first (s)")
+
                 elif command == 'a':
                     print("Auto-bot activated with anti-ban measures")
                     while True:
@@ -451,7 +515,7 @@ class HackerIOBot:
                             if self.start_hack():
                                 self.hack_loop()
                                 print("Hack complete")
-                                self.random_delay(0.5, 1.0)  # Original delay after hack
+                                self.random_delay(10, 15)  # Original delay after hack
                             else:
                                 print("Skipping to next target...")
                                 self.close_window()

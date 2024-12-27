@@ -742,5 +742,19 @@
     "serverlog": "serverlog",
     "overclock": "overclock",
     "htm": "html",
-    "mutt": "null"
+    "mutt": "null",
+    "recv": "recv",
+    "sap": "soap",
+    "hidge": "hide",
+    "eriuim": "enum",
+    "rack": "hack",
+    "unix": "unix",
+    "qdisk": "disk",
+    "patchavailable": "patchAvailable",
+    "sadwaredetected": "adwareDetected",
+    "decryptionfrail": "decryptionFail",
+    "sessionmeout": "sessionTimeout",
+    "policynforcea": "policyEnforced",
+    "cyu": "cpu",
+    "cdown": "down"
 }
