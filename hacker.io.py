@@ -163,8 +163,6 @@ class HackerIOBot:
                 
                 # Split target details
                 target_parts = target_text.split()
-
-                print("\nparts: ", target_parts)
                 
                 # Check conditions
                 has_level = target_parts[0].isdigit()  # Check if first part is a level
