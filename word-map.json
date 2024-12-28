@@ -798,6 +798,17 @@
     "wormvirus": "wormVirus",
     "witihack": "wifiHack",
     "ipaddress": "ipAddress",
-    "":"io",
-    "gateway":"gateway"
+    "": "io",
+    "gateway": "gateway",
+    "vpntonnection": "vpnConnection",
+    "forensicanalysis": "forensicAnalysis",
+    "virusintfection": "virusInfection",
+    "tramework": "framework",
+    "backuprestore": "backupRestore",
+    "bruteforcelry": "bruteForceTry",
+    "tirewallules": "firewallRules",
+    "forensicnalysis": "forensicAnalysis",
+    "networklrattfic": "networkTraffic",
+    "zipbomb": "zipBomb",
+    "hackedservers": "hackedServers"
 }
