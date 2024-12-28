@@ -13,7 +13,7 @@ import json
 from OCR import extract_text_from_base64_image
 from time import sleep
 import math
-from selenium.webdriver.safari.options import Options
+from selenium.webdriver.chrome.options import Options
 
 load_dotenv()
 username = 'NeverGiveU79678'
@@ -28,18 +28,16 @@ class HackerIOBot:
         self.fails = 0
 
     def setup_driver(self):
-        """Initialize and configure the Safari WebDriver"""
+        """Initialize and configure the Chrome WebDriver"""
         try:
-            # Enable Safari driver if not already enabled
-            os.system('safaridriver --enable')
+            # Initialize Chrome options
+            chrome_options = Options()
+            chrome_options.add_argument("--start-maximized")
             
-            # Initialize Safari driver
-            self.driver = webdriver.Safari()
+            # Initialize Chrome driver
+            self.driver = webdriver.Chrome(options=chrome_options)
             self.wait = WebDriverWait(self.driver, 2)
             
-            # Set full screen
-            self.driver.maximize_window()
-
             self.driver.get("https://s0urce.io/")
             
             # Get window dimensions
@@ -165,14 +163,15 @@ class HackerIOBot:
                 
                 # Split target details
                 target_parts = target_text.split()
+
+                print("\nparts: ", target_parts)
                 
                 # Check conditions
                 has_level = target_parts[0].isdigit()  # Check if first part is a level
-                is_npc = "NPC" in target_parts
-                has_cooldown = any("m" in part or "s" in part for part in target_parts)  # Check for cooldown times
+                has_cooldown = any(part[:-1].isdigit() and part[-1] in ['m', 's'] for part in target_parts)  # Check for cooldown times
                 is_you = "(you)" in target_parts
                 
-                if has_level and not is_npc and not has_cooldown and not is_you:
+                if has_level and not has_cooldown and not is_you:
                     valid_targets.append(target)
             
             # Save target details to a file for debugging
@@ -182,6 +181,7 @@ class HackerIOBot:
             
             # Choose NPC target, if not select the one with the lowest level
             if valid_targets:
+                selected_target = None
                 # Sort targets by NPC status and level
                 def get_target_level(target):
                     parts = target.text.strip().split()
@@ -194,10 +194,7 @@ class HackerIOBot:
                 valid_targets.sort(key=get_target_level)
                 
                 # Select first target (NPC or lowest level)
-                if valid_targets[0].text.strip().split()[1] == 'NPC':
-                    selected_target = valid_targets[0]
-                else:
-                    selected_target = random.choice(valid_targets[:5])
+                selected_target = valid_targets[0]
 
             if selected_target:
                 self.driver.execute_script("arguments[0].click();", selected_target)
