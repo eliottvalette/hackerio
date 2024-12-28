@@ -81,21 +81,28 @@ class HackerIOBot:
             play_button.click()
         else :
             time.sleep(3)
-            login_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
-            login_button.click()
+            try: 
+                login_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+                login_button.click()
 
-            auth_link = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='/auth/twitter']")) )
-            auth_link.click()
+                auth_link = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='/auth/twitter']")) )
+                auth_link.click()
 
-            time.sleep(6)
+                time.sleep(6)
+            except:
+                pass
 
-            username_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
-            username_input.send_keys(username)
+            
+            try: 
+                username_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
+                username_input.send_keys(username)
 
-            next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
-            next_button.click()
+                next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
+                next_button.click()
 
-            time.sleep(6)
+                time.sleep(6)
+            except:
+                pass
 
             try :
                 email_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
@@ -103,29 +110,38 @@ class HackerIOBot:
 
                 next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
                 next_button.click()
+                time.sleep(3)
             except :
                 pass
 
-            time.sleep(3)
+            
+            try : 
+                password_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="password"]')))
+                password_input.send_keys(password)
 
-            password_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="password"]')))
-            password_input.send_keys(password)
+                login_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Log in']]")))
+                login_button.click()
 
-            login_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Log in']]")))
-            login_button.click()
+                time.sleep(3)
+            except :
+                pass
 
-            time.sleep(3)
+            try:
+                auth_app_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Authorize app']]")))
+                self.driver.execute_script("arguments[0].scrollIntoView(true);", auth_app_button)
+                auth_app_button.click()
 
-            auth_app_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Authorize app']]")))
-            self.driver.execute_script("arguments[0].scrollIntoView(true);", auth_app_button)
-            auth_app_button.click()
-
-            time.sleep(5)
+                time.sleep(5)
+            except :
+                pass
 
             self.close_window()
 
-            play_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
-            play_button.click()
+            try:
+                play_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+                play_button.click()
+            except :
+                pass
 
             time.sleep(1)
     
@@ -508,7 +524,7 @@ class HackerIOBot:
                             if self.start_hack():
                                 self.hack_loop()
                                 print("Hack complete")
-                                self.random_delay(10, 15)  # Original delay after hack
+                                self.random_delay(1, 3)  # Original delay after hack
                             else:
                                 print("Skipping to next target...")
                                 self.close_window()

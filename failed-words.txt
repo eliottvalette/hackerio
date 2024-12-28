@@ -2,3 +2,60 @@ diskclean -- diskclean
 innocenterdict -- incidentVerdict
 scat -- stat
  -- 
+ -- 
+taise -- database
+tt -- text
+tt -- text
+wih -- wih
+ela -- ela
+wih -- wih
+ecy -- key
+sel -- sql
+darknetaccess -- darknetccess
+serverlog -- serverlog
+hostname -- host
+proxyserver -- proxyserver
+xm -- xml
+portscan -- portscanning
+ylov -- ylov
+code -- code
+shellcode -- encode
+ -- 
+disklean -- diskclean
+nie -- net
+ecy -- key
+patch -- patch
+jump -- jump
+identity -- init
+tind -- find
+url -- url
+tirewallstate -- firewall
+oy -- poly
+taise -- this
+long -- long
+ -- 
+url -- url
+threatdetection -- threatDetection
+ecy -- key
+pamela -- pamela
+thiea -- threat
+rit -- write
+serverlog -- serverlog
+snu -- num
+nove -- move
+ntsile -- getfile
+ -- 
+wih -- wih
+wo -- word
+linux -- linux
+packetniff -- packetSniff
+url -- url
+ciskclean -- scan
+url -- url
+encryptionkey -- encryptionkey
+secl -- scoflh
+serverlog -- serverlog
+tcpipctig -- scripting
+secl -- scoflh
+ae -- no
+right -- right
