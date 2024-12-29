@@ -271,7 +271,6 @@ class HackerIOBot:
         img_src = word_img.get_attribute("src")
 
         text, OCR_result = extract_text_from_base64_image(img_src)
-        print(f"Extracted text: {text}")
         return img_src, text, OCR_result
 
     def random_delay(self, min_delay=0.05, max_delay=0.15):
@@ -366,13 +365,13 @@ class HackerIOBot:
     def close_window(self):
         """Close the hacking window with improved error handling"""
         try:
-            time.sleep(0.5)  # Increased wait time
+            time.sleep(0.1)  # Increased wait time
 
             # Try to find and click 'Ok, cool' button first
             try:
                 ok_cool_button = self.driver.find_element(By.XPATH, "//button[text()='Ok, cool']")
                 self.driver.execute_script("arguments[0].click();", ok_cool_button)
-                time.sleep(0.3)
+                time.sleep(0.1)
             except:
                 pass
 
@@ -381,7 +380,7 @@ class HackerIOBot:
             for button in close_buttons:
                 try:
                     self.driver.execute_script("arguments[0].click();", button)
-                    time.sleep(0.3)
+                    time.sleep(0.1)
                 except:
                     continue
 
@@ -397,7 +396,7 @@ class HackerIOBot:
                 try:
                     ok_cool_button = self.driver.find_element(By.XPATH, "//button[text()='Ok, cool']")
                     self.driver.execute_script("arguments[0].click();", ok_cool_button)
-                    time.sleep(0.3)
+                    time.sleep(0.1)
                 except:
                     pass
                 
@@ -441,8 +440,6 @@ class HackerIOBot:
                         return
                 except:
                     pass
-                
-                time.sleep(1.5)
                 
             except Exception as e:
                 print(f"Error in hack loop: {e}")
@@ -543,7 +540,7 @@ class HackerIOBot:
                         self.random_delay(0.3, 0.7)  # Original close window delay
                         
                         # Add random breaks between sessions
-                        break_time = random.uniform(10, 20)
+                        break_time = random.uniform(5, 12)
                         print(f"Taking a break for {break_time:.1f} seconds...")
                         sleep(break_time)
 
