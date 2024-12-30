@@ -156,12 +156,12 @@ class HackerIOBot:
     def select_target(self):
         """Select a valid target to hack based on criteria."""
         try:
-            time.sleep(0.5)
+            time.sleep(0.1)
             
             # Click target list
             target_list = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Target List']")))
             self.driver.execute_script("arguments[0].click();", target_list)
-            time.sleep(0.5)
+            time.sleep(0.1)
             
             # Locate targets
             real_target_list = self.wait.until(EC.presence_of_element_located((By.ID, 'list')))
@@ -213,7 +213,7 @@ class HackerIOBot:
             if selected_target:
                 self.driver.execute_script("arguments[0].click();", selected_target)
                 print(f"Selected target: {selected_target.text}")
-                time.sleep(0.3)
+                time.sleep(0.1)
             else:
                 print("No valid targets found")
                 
@@ -226,7 +226,7 @@ class HackerIOBot:
     def start_hack(self):
         """Initiate the hacking process"""
         try:
-            time.sleep(0.5)  # Increased wait time
+            time.sleep(0.1)  # Increased wait time
             
             # Find and click hack button
             hack_button = self.wait.until(EC.presence_of_element_located((By.XPATH, "//button[text()='Hack']")))
@@ -237,7 +237,7 @@ class HackerIOBot:
             
             # Click hack button using JavaScript
             self.driver.execute_script("arguments[0].click();", hack_button)
-            time.sleep(0.5)  # Wait for animation
+            time.sleep(0.1)  # Wait for animation
             
             # Find and click port button
             try:
@@ -245,7 +245,7 @@ class HackerIOBot:
                     (By.XPATH, "//button[contains(text(), 'Port ')]")
                 ))
                 self.driver.execute_script("arguments[0].click();", port_button)
-                time.sleep(0.3)
+                time.sleep(0.1)
                 
                 # Verify hack window is open
                 self.wait.until(EC.presence_of_element_located((By.ID, 'word-to-type')))
@@ -273,7 +273,7 @@ class HackerIOBot:
         text, OCR_result = extract_text_from_base64_image(img_src)
         return img_src, text, OCR_result
 
-    def random_delay(self, min_delay=0.05, max_delay=0.15):
+    def random_delay(self, min_delay=0.02, max_delay=0.1):
         """Add random delay between actions"""
         sleep(random.uniform(min_delay, max_delay))
 
@@ -287,7 +287,7 @@ class HackerIOBot:
             # Type word with delays
             for char in word:
                 input_field.send_keys(char)
-                time.sleep(random.uniform(0.1, 0.2))
+                time.sleep(random.uniform(0.08, 0.15))  # Increased typing speed
             
             # Click submit using JavaScript
             submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
@@ -411,7 +411,7 @@ class HackerIOBot:
                 try:
                     img_src, word, OCR_result = self.process_word()
                     self.submit_word(word)
-                    time.sleep(1)
+                    time.sleep(1.3)
                     
                     new_tries = self.get_current_tries()
                     
@@ -460,7 +460,7 @@ class HackerIOBot:
                               "q - Quit\n"
                               "Enter command: ").lower()
 
-                if command == 'h':
+                if 'command' == 'h':
                     number_of_hacks = input("How many hacks to do? ")
                     for _ in range(int(number_of_hacks)):
                         if self.driver:
@@ -512,35 +512,35 @@ class HackerIOBot:
                     print("Auto-bot activated with anti-ban measures")
                     while True:
                         # Random number of hacks per session
-                        num_hacks = random.randint(5, 8)
+                        num_hacks = random.randint(3, 8)
                         
                         for _ in range(num_hacks):
                             self.select_target()
-                            self.random_delay(3, 7)  # Original delay between targets
+                            self.random_delay(0.1, 1)  # Reduced delay between targets
                             
                             if self.start_hack():
                                 self.hack_loop()
                                 print("Hack complete")
-                                self.random_delay(1, 3)  # Original delay after hack
+                                self.random_delay(0.5, 2)  # Reduced delay after hack
                             else:
                                 print("Skipping to next target...")
                                 self.close_window()
                             
                         # Take rewards and items
                         self.take_all()
-                        self.random_delay(1.0, 2.0)  # Original delay after taking rewards
+                        self.random_delay(0.1, 0.2)  # Reduced delay after taking rewards
                         
                         self.open_inventory()
-                        self.random_delay(0.5, 1.0)  # Original inventory delay
+                        self.random_delay(0.1, 0.2)  # Reduced inventory delay
                         
                         self.take_item()
-                        self.random_delay(0.5, 1.0)  # Original item delay
+                        self.random_delay(0.1, 0.2)  # Reduced item delay
                         
                         self.close_window()
-                        self.random_delay(0.3, 0.7)  # Original close window delay
+                        self.random_delay(0.1, 0.2)  # Reduced close window delay
                         
                         # Add random breaks between sessions
-                        break_time = random.uniform(5, 12)
+                        break_time = random.uniform(5, 13)  # Reduced break time
                         print(f"Taking a break for {break_time:.1f} seconds...")
                         sleep(break_time)
 
