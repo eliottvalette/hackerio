@@ -2,12 +2,14 @@
 aromajone
 35
 alymbek
+39
+lynn
 40
 enzolbe
+40
+Yabluzo
 45
 Veggzy
-46
-Adfrankfurt
 56
 ElonMusk
 65
@@ -26,9 +28,3 @@ AnsonEnderBorn
 Anax01
 29
 Melins
-25
-meldon
-22
-Ariken
-20
-Bababooey
