@@ -496,8 +496,6 @@ class HackerIOBot:
                 elif command == 'r':
                     if self.driver:
                         self.take_all()
-                        self.open_inventory()
-                        self.take_item()
                         print("All rewards taken")
                     else:
                         print("Please setup first (s)")
@@ -529,12 +527,6 @@ class HackerIOBot:
                         # Take rewards and items
                         self.take_all()
                         self.random_delay(0.1, 0.2)  # Reduced delay after taking rewards
-                        
-                        self.open_inventory()
-                        self.random_delay(0.1, 0.2)  # Reduced inventory delay
-                        
-                        self.take_item()
-                        self.random_delay(0.1, 0.2)  # Reduced item delay
                         
                         self.close_window()
                         self.random_delay(0.1, 0.2)  # Reduced close window delay
