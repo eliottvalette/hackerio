@@ -51,6 +51,15 @@ def find_closest_match(word, word_map):
         closest_match = matches[0]
         print(f"Mot original: '{word}' -> Correspondance la plus proche: '{closest_match}'")
         return closest_match
+
+    # Find closest matches lowered
+    matches_lower = get_close_matches(word.lower(), valid_words, n=1, cutoff=0.6)
+    
+    if matches_lower:
+        print(f"Matches: {matches_lower}")
+        closest_match_lower = matches_lower[0]
+        print(f"Mot original lowered: '{word.lower()}' -> Correspondance la plus proche: '{closest_match_lower}'")
+        return closest_match_lower
     
     print(f"Aucune correspondance trouvée pour: '{word}'")
     return word
@@ -84,7 +93,7 @@ def extract_text_from_base64_image(base64_string):
         image = Image.open(io.BytesIO(image_data))
         
         # Effectuer l'OCR avec pytesseract
-        custom_config = '--psm 8 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01'
+        custom_config = '--psm 7 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01'
         extracted_text = pytesseract.image_to_string(image, config=custom_config)
         
         # Nettoyer le texte extrait
