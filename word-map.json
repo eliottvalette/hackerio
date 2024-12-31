@@ -986,5 +986,9 @@
     "YWASS": "pass",
     "reoffendingRisk": "reoffendingRisk",
     "UISeL": "user",
-    "VASS": "pass"
+    "VASS": "pass",
+    "WASS": "pass",
+    "SOapy": "soap",
+    "Wi": "win",
+    "pLeV": "prev"
 }

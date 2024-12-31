@@ -72,6 +72,7 @@ class HackerIOBot:
 
     def login(self, unknown=False):
         """Handle the login process"""
+        self.wait = WebDriverWait(self.driver, 5)
         if unknown:
             name_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"]')))
             # Random name with 7 letters
@@ -80,7 +81,6 @@ class HackerIOBot:
             play_button = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button.grey.svelte-ec9kqa")))
             play_button.click()
         else :
-            time.sleep(3)
             try: 
                 login_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
                 login_button.click()
@@ -88,10 +88,10 @@ class HackerIOBot:
                 auth_link = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//a[@href='/auth/twitter']")) )
                 auth_link.click()
 
-                time.sleep(6)
             except:
                 pass
 
+            time.sleep(1)
             
             try: 
                 username_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="text"]')))
@@ -99,8 +99,6 @@ class HackerIOBot:
 
                 next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
                 next_button.click()
-
-                time.sleep(6)
             except:
                 pass
 
@@ -110,19 +108,15 @@ class HackerIOBot:
 
                 next_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Next']]")))
                 next_button.click()
-                time.sleep(3)
             except :
                 pass
 
-            
             try : 
                 password_input = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[type="password"]')))
                 password_input.send_keys(password)
 
                 login_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Log in']]")))
                 login_button.click()
-
-                time.sleep(3)
             except :
                 pass
 
@@ -130,10 +124,10 @@ class HackerIOBot:
                 auth_app_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Authorize app']]")))
                 self.driver.execute_script("arguments[0].scrollIntoView(true);", auth_app_button)
                 auth_app_button.click()
-
-                time.sleep(5)
             except :
                 pass
+                
+            time.sleep(1)
 
             self.close_window()
 
@@ -143,7 +137,7 @@ class HackerIOBot:
             except :
                 pass
 
-            time.sleep(1)
+        self.wait = WebDriverWait(self.driver, 2)
     
     def click_green_button(self):
         """Click the green button"""
@@ -152,6 +146,19 @@ class HackerIOBot:
             green_button.click()
         except Exception as e:
             print(f"Error clicking green button: {e}")
+
+    def refresh_and_relogin(self):
+        """Refresh the page and relogin"""
+        try:
+            self.driver.refresh()
+            time.sleep(3)
+            try : 
+                green_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+                green_button.click()
+            except:
+                self.login()
+        except Exception as e:
+            print(f"Error refreshing and relogging: {e}")
 
     def select_target(self):
         """Select a valid target to hack based on criteria."""
@@ -211,12 +218,14 @@ class HackerIOBot:
                 selected_target = valid_targets[0]
 
             if selected_target:
+                is_npc = "NPC" in selected_target.text
                 self.driver.execute_script("arguments[0].click();", selected_target)
                 print(f"Selected target: {selected_target.text}")
                 time.sleep(0.1)
+                return is_npc
             else:
                 print("No valid targets found")
-                
+                return False
         except Exception as e:
             print(f"Error selecting target: {e}")
             # Try to close any open windows
@@ -277,7 +286,7 @@ class HackerIOBot:
         """Add random delay between actions"""
         sleep(random.uniform(min_delay, max_delay))
 
-    def submit_word(self, word):
+    def submit_word(self, word, is_npc):
         """Submit the word with human-like typing"""
         try:
             # Find and clear input field
@@ -287,7 +296,10 @@ class HackerIOBot:
             # Type word with delays
             for char in word:
                 input_field.send_keys(char)
-                time.sleep(random.uniform(0.08, 0.15))  # Increased typing speed
+                if is_npc:
+                    time.sleep(0.01)
+                else:
+                    time.sleep(random.uniform(0.08, 0.15))  # Increased typing speed
             
             # Click submit using JavaScript
             submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
@@ -361,6 +373,23 @@ class HackerIOBot:
 
         except Exception as e:
             print(f"Error in take_item: {e}")
+    
+    def grab_agent_loot(self):
+        """Grab both loots from agents"""
+        try:
+            inventory_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Agents']")))
+            self.driver.execute_script("arguments[0].click();", inventory_button)
+            time.sleep(0.1)
+
+            # list Grab loot buttons //button[text()='Grab Loot']
+            grab_loot_buttons = self.driver.find_elements(By.XPATH, "//button[text()='Grab Loot']")
+            for button in grab_loot_buttons:
+                self.driver.execute_script("arguments[0].click();", button)
+                time.sleep(0.1)
+
+        except Exception as e:
+            print(f"Error selecting target: {e}")
+            raise e
 
     def close_window(self):
         """Close the hacking window with improved error handling"""
@@ -387,9 +416,10 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error closing window: {e}")
 
-    def hack_loop(self):
+    def hack_loop(self, is_npc):
         """Main hacking loop"""
         self.fails = 0
+        break_time = 0.1 if is_npc else 1.3
         while True:
             try:
                 # Try to handle 'Ok, cool' button if present
@@ -410,8 +440,8 @@ class HackerIOBot:
                 # Process word and submit
                 try:
                     img_src, word, OCR_result = self.process_word()
-                    self.submit_word(word)
-                    time.sleep(1.3)
+                    self.submit_word(word, is_npc)
+                    time.sleep(break_time)
                     
                     new_tries = self.get_current_tries()
                     
@@ -444,6 +474,45 @@ class HackerIOBot:
             except Exception as e:
                 print(f"Error in hack loop: {e}")
                 return
+    
+    def auto_bot(self):
+        """Auto-bot method with anti-ban measures"""
+        while True:
+            # Random number of hacks per session
+            num_hacks = random.randint(3, 5)
+            
+            for _ in range(num_hacks):
+                is_npc = self.select_target()
+                self.random_delay(0.1, 1)  # Reduced delay between targets
+                
+                if self.start_hack():
+                    self.hack_loop(is_npc)
+                    print("Hack complete")
+                    self.random_delay(0.5, 2)  # Reduced delay after hack
+                else:
+                    print("Skipping to next target...")
+                    self.close_window()
+                
+            # Take rewards and items
+            self.take_all()
+            self.random_delay(0.1, 0.2)  # Reduced delay after taking rewards
+
+            self.grab_agent_loot()
+            self.random_delay(0.1, 0.2)
+            
+            self.close_window()
+            self.random_delay(0.1, 0.2)  # Reduced close window delay
+            
+            # Add random breaks between sessions
+            if is_npc :
+                break_time = 0.1
+            else :
+                break_time = random.uniform(5, 13)  # Reduced break time
+            print(f"Taking a break for {break_time:.1f} seconds...")
+            sleep(break_time)
+
+            if random.random() < 0.4:
+                self.refresh_and_relogin()
 
     def run_interactive(self):
         """Interactive main method with anti-ban measures"""
@@ -452,10 +521,13 @@ class HackerIOBot:
         try:
             while True:
                 command = input("\nCommands:\n"
+                              "t - Take all rewards\n"
                               "h - Start hack and loop\n"
                               "c - Close window\n"
                               "s - Select target\n"
-                              "r - Take all rewards\n"
+                              "r - Refresh and relogin\n"
+                              "g - Click green button\n"
+                              "l - Grab agent loots\n"
                               "a - Activate auto-bot\n"
                               "q - Quit\n"
                               "Enter command: ").lower()
@@ -464,9 +536,9 @@ class HackerIOBot:
                     number_of_hacks = input("How many hacks to do? ")
                     for _ in range(int(number_of_hacks)):
                         if self.driver:
-                            self.select_target()
+                            is_npc = self.select_target()
                             if self.start_hack():  # Only continue if hack started successfully
-                                self.hack_loop()
+                                self.hack_loop(is_npc)
                                 print("Hack complete")
                             else:
                                 print("Skipping to next target...")
@@ -476,7 +548,7 @@ class HackerIOBot:
 
                 elif command == 's':
                     if self.driver:
-                        self.select_target()
+                        is_npc = self.select_target()
                     else:
                         print("Please setup first (s)")
 
@@ -493,10 +565,16 @@ class HackerIOBot:
                     else:
                         print("Please setup first (s)")
 
-                elif command == 'r':
+                elif command == 't':
                     if self.driver:
                         self.take_all()
                         print("All rewards taken")
+                    else:
+                        print("Please setup first (s)")
+                
+                elif command == 'r':
+                    if self.driver:
+                        self.refresh_and_relogin()
                     else:
                         print("Please setup first (s)")
 
@@ -506,35 +584,15 @@ class HackerIOBot:
                     else:
                         print("Please setup first (s)")
 
+                elif command == 'l':
+                    if self.driver:
+                        self.grab_agent_loot()
+                    else:
+                        print("Please setup first (s)")
+
                 elif command == 'a':
                     print("Auto-bot activated with anti-ban measures")
-                    while True:
-                        # Random number of hacks per session
-                        num_hacks = random.randint(3, 8)
-                        
-                        for _ in range(num_hacks):
-                            self.select_target()
-                            self.random_delay(0.1, 1)  # Reduced delay between targets
-                            
-                            if self.start_hack():
-                                self.hack_loop()
-                                print("Hack complete")
-                                self.random_delay(0.5, 2)  # Reduced delay after hack
-                            else:
-                                print("Skipping to next target...")
-                                self.close_window()
-                            
-                        # Take rewards and items
-                        self.take_all()
-                        self.random_delay(0.1, 0.2)  # Reduced delay after taking rewards
-                        
-                        self.close_window()
-                        self.random_delay(0.1, 0.2)  # Reduced close window delay
-                        
-                        # Add random breaks between sessions
-                        break_time = random.uniform(5, 13)  # Reduced break time
-                        print(f"Taking a break for {break_time:.1f} seconds...")
-                        sleep(break_time)
+                    self.auto_bot()
 
                 else:
                     print("Invalid command")
