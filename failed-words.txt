@@ -118,3 +118,13 @@ find -- find
 LTecy -- LTecy
 urTL -- url
 OVeTi -- over
+HOoOOL -- hotspotControl
+Lett -- Lett
+tTast -- test
+ -- 
+HOoOOL -- hotspotControl
+HOoOOL -- hotspotControl
+Tan -- Tan
+save -- save
+Linux -- linux
+high -- high
