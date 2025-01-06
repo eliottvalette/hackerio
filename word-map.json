@@ -895,7 +895,6 @@
     "wormVirus": "wormVirus",
     "pLTev": "prev",
     "packetSniftfer": "packetSniffer",
-    "Lett": "Lett",
     "equcationProgram": "educationProgram",
     "cend": "send",
     "prisonTranster": "prisonTransfer",
@@ -1015,5 +1014,16 @@
     "TirewalLll": "firewall",
     "spyWare": "spyware",
     "virusIntfection": "virusInfection",
-    "packetSniitt": "packetSniff"
+    "packetSniitt": "packetSniff",
+    "jJson": "json",
+    "scafi": "scan",
+    "torensicAnalysis": "forensicAnalysis",
+    "hackerlTD": "hackerID",
+    "thio":"user",
+    "Tan":"ram",
+    "wLOV":"prev",
+    "Lett":"left",
+    "atmnL":"html",
+    "WOOP":"pop",
+    "ela":"else"
 }
