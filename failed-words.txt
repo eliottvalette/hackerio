@@ -79,3 +79,6 @@ ytnL -- ytnb
 SCaotli -- scaoatli
 xT -- text
 Lfallt -- fault
+Chu -- Chu
+ort -- port
+ -- 

@@ -940,7 +940,6 @@
     "vVirusintection": "virusInfection",
     "ransomwareHit": "ransomwareHit",
     "COpy": "copy",
-    "Chu": "Chu",
     "dnsSpoot": "dnsSpoof",
     "hHode": "node",
     "nackedServers": "hackedServers",
@@ -1006,5 +1005,6 @@
     "freeware": "freeware",
     "CLORy": "copy",
     "adqir": "dir",
-    "scaoatli":"scan"
+    "scaoatli": "scan",
+    "Chu":"cpu"
 }
