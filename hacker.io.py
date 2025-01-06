@@ -157,7 +157,7 @@ class HackerIOBot:
             self.close_window()
 
             try:
-                play_button = self.wait.until(EC.element_to_be_clickable((By.CLASS_NAME, "green")))
+                play_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Play']]")))
                 play_button.click()
             except :
                 pass
@@ -215,9 +215,10 @@ class HackerIOBot:
                 # Check conditions
                 has_level = target_parts[0].isdigit()  # Check if first part is a level
                 has_cooldown = any(part[:-1].isdigit() and part[-1] in ['m', 's'] for part in target_parts)  # Check for cooldown times
+                is_vash = "Vash" in target_parts
                 is_you = "(you)" in target_parts
                 
-                if has_level and not has_cooldown and not is_you:
+                if has_level and not has_cooldown and not is_you and not is_vash:
                     valid_targets.append(target)
             
             # Save target details to a file for debugging
@@ -322,7 +323,7 @@ class HackerIOBot:
             for char in word:
                 input_field.send_keys(char)
                 if is_npc:
-                    time.sleep(0.01)
+                    time.sleep(0.08)
                 else:
                     time.sleep(random.uniform(0.08, 0.15))  # Increased typing speed
             
@@ -415,6 +416,23 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error selecting target: {e}")
             raise e
+    
+    def up_agents(self):   
+        """Upgrade agents"""
+        try:
+            agents_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Agents']")))
+            self.driver.execute_script("arguments[0].click();", agents_button)
+            time.sleep(0.1)
+
+            # list Upgrade buttons //button[text()='Upgrade']
+            upgrade_buttons = self.driver.find_elements(By.XPATH, "//button[text()='Upgrade']")
+            for button in upgrade_buttons:
+                self.driver.execute_script("arguments[0].click();", button)
+                time.sleep(0.1)
+
+        except Exception as e:
+            print(f"Error selecting target: {e}")
+            raise
 
     def close_window(self):
         """Close the hacking window with improved error handling"""
@@ -444,7 +462,7 @@ class HackerIOBot:
     def hack_loop(self, is_npc):
         """Main hacking loop"""
         self.fails = 0
-        break_time = 0.1 if is_npc else 1.3
+        break_time = 0.8 if is_npc else 1.3
         while True:
             try:
                 # Try to handle 'Ok, cool' button if present
@@ -504,7 +522,7 @@ class HackerIOBot:
         """Auto-bot method with anti-ban measures"""
         while self.run_auto_bot:
             # Random number of hacks per session
-            num_hacks = 1 # random.randint(3, 5)
+            num_hacks = random.randint(3, 5)
             
             for _ in range(num_hacks):
                 is_npc = self.select_target()
@@ -516,27 +534,27 @@ class HackerIOBot:
                 else:
                     print("Skipping to next target...")
                     self.close_window()
-                
-                if random.random() < 1:
-                    print('Proposing to stop the bot :')
-                    input_timout = input_with_timeout("Do you want to stop the bot? (y/n) ", timeout=2) 
-                    print(f"Input: {input_timout}")
-                    self.run_auto_bot = input_timout != 'y'
-                    print(f"Bot status: {'Running' if self.run_auto_bot else 'Stopped'}")
+
                 
             # Take rewards and items
             self.take_all()
-            self.random_delay(0.1, 0.2)  # Reduced delay after taking rewards
+            self.random_delay(0.1, 0.2) 
 
             self.grab_agent_loot()
             self.random_delay(0.1, 0.2)
             
             self.close_window()
-            self.random_delay(0.1, 0.2)  # Reduced close window delay
+            self.random_delay(0.1, 0.2)
+
+            self.up_agents()
+            self.random_delay(0.1, 0.2)
+
+            self.close_window()
+            self.random_delay(0.1, 0.2)
             
             # Add random breaks between sessions
             if is_npc :
-                break_time = 0.1
+                break_time = random.uniform(2, 3)
             else :
                 break_time = random.uniform(5, 13)  # Reduced break time
             print(f"Taking a break for {break_time:.1f} seconds...")
