@@ -1,44 +1,14 @@
-wLOV -- wLOV
-thio -- this (user)
-thio -- this
-Tan -- Tan (ram)
-wLOV -- wLOV (prev)
-LTecy -- LTecy
-LTecy -- LTecy
-Pamela -- Pamela
-Lett -- Lett (left)
-atmnL -- atm (html)
-snu -- num
-Lcallt -- call
-LU -- LU
-Over -- over
-SaAavyc -- say
-nite -- init
-wLoOV -- loop
-WOOP -- loop (pop)
-LU -- LU
-hod -- hod
-Lcallt -- call
-ytnL -- ytnb
-hod -- hod
-nie -- net
-hod -- hod
-thia -- this
-ela -- ela
-enuli -- null
-aL -- val
-thia -- this
-ela -- ela
 HoOOoL -- hotspotControl
-trojanHrs -- trojanVirus
-nie -- net
-nie -- net
-nie -- net
-Over -- over
-Over -- over
-sal -- val
-down -- down
-web -- web
-ela -- ela
-ela -- ela (on)
-tTast -- test
+ -- 
+OVetri -- over
+ -- 
+nite -- init
+ -- 
+nite -- init
+ -- 
+exLt -- text
+url -- url
+OVetri -- over
+ -- 
+HoOOoL -- hotspotControl
+ -- 
