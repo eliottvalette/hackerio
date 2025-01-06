@@ -499,7 +499,7 @@ class HackerIOBot:
                 
                 if random.random() < 1:
                     print('Proposing to stop the bot :')
-                    input_timout = input_with_timeout("Do you want to stop the bot? (y/n) ", timeout=self.random_delay(1, 2)) 
+                    input_timout = input_with_timeout("Do you want to stop the bot? (y/n) ", timeout=2) 
                     print(f"Input: {input_timout}")
                     self.run_auto_bot = input_timout != 'y'
                     print(f"Bot status: {'Running' if self.run_auto_bot else 'Stopped'}")

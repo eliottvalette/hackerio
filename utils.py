@@ -1,6 +1,6 @@
 import threading
 
-def input_with_timeout(prompt, timeout=10):
+def input_with_timeout(prompt, timeout):
     user_input = [None]  # Use a mutable object to store the input
 
     def get_input():
