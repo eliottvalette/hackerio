@@ -683,7 +683,6 @@
     "phishingdattempt": "phishingAttempt",
     "accessranted": "accessGranted",
     "ecy": "key",
-    "scaoatli": "scaoatli",
     "rtrext": "text",
     "encryptionfail": "encryptionFail",
     "systemeboot": "systemReboot",
@@ -1004,5 +1003,8 @@
     "Hits": "bits",
     "tTramework": "framework",
     "VLEeEW": "view",
-    "freeware": "freeware"
+    "freeware": "freeware",
+    "CLORy": "copy",
+    "adqir": "dir",
+    "scaoatli":"scan"
 }

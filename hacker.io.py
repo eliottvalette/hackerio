@@ -5,19 +5,23 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options
+from OCR import extract_text_from_base64_image
+
 from dotenv import load_dotenv
+
 import os
 import time
 import random
 import json
-from OCR import extract_text_from_base64_image
-from time import sleep
 import math
-from selenium.webdriver.chrome.options import Options
+
+from utils import input_with_timeout
+from time import sleep
 
 load_dotenv()
-username = 'Cutest636225'
-email = 'topice5948@chansd.com'
+username = 'Cutie160053'
+email = 'sitif93205@pofmagic.com'
 
 password = os.getenv("PASSWORD")
 class HackerIOBot:
@@ -26,6 +30,7 @@ class HackerIOBot:
         self.wait = None
         self.saved_words_OCR = self.load_saved_words_OCR()
         self.fails = 0
+        self.run_auto_bot = False
 
     def setup_driver(self):
         """Initialize and configure the Chrome WebDriver"""
@@ -477,13 +482,12 @@ class HackerIOBot:
     
     def auto_bot(self):
         """Auto-bot method with anti-ban measures"""
-        while True:
+        while self.run_auto_bot:
             # Random number of hacks per session
-            num_hacks = random.randint(3, 5)
+            num_hacks = 1 # random.randint(3, 5)
             
             for _ in range(num_hacks):
                 is_npc = self.select_target()
-                self.random_delay(0.1, 1)  # Reduced delay between targets
                 
                 if self.start_hack():
                     self.hack_loop(is_npc)
@@ -492,6 +496,13 @@ class HackerIOBot:
                 else:
                     print("Skipping to next target...")
                     self.close_window()
+                
+                if random.random() < 1:
+                    print('Proposing to stop the bot :')
+                    input_timout = input_with_timeout("Do you want to stop the bot? (y/n) ", timeout=self.random_delay(1, 2)) 
+                    print(f"Input: {input_timout}")
+                    self.run_auto_bot = input_timout != 'y'
+                    print(f"Bot status: {'Running' if self.run_auto_bot else 'Stopped'}")
                 
             # Take rewards and items
             self.take_all()
@@ -513,6 +524,7 @@ class HackerIOBot:
 
             if random.random() < 0.4:
                 self.refresh_and_relogin()
+
 
     def run_interactive(self):
         """Interactive main method with anti-ban measures"""
@@ -592,6 +604,7 @@ class HackerIOBot:
 
                 elif command == 'a':
                     print("Auto-bot activated with anti-ban measures")
+                    self.run_auto_bot = True
                     self.auto_bot()
 
                 else:
