@@ -93,7 +93,7 @@ def extract_text_from_base64_image(base64_string):
         image = Image.open(io.BytesIO(image_data))
         
         # Effectuer l'OCR avec pytesseract
-        custom_config = '--psm 7 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01'
+        custom_config = '--psm 13 --oem 3 -c tessedit_char_whitelist=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01'
         extracted_text = pytesseract.image_to_string(image, config=custom_config)
         
         # Nettoyer le texte extrait

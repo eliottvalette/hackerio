@@ -5,19 +5,24 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.chrome.options import Options
+from OCR import extract_text_from_base64_image
+
 from dotenv import load_dotenv
+from time import sleep
+
 import os
 import time
 import random
 import json
-from OCR import extract_text_from_base64_image
-from time import sleep
 import math
-from selenium.webdriver.chrome.options import Options
+
+import threading
+from pynput import keyboard
 
 load_dotenv()
-username = 'NeverGiveU79678'
-email = 'jihop22591@myweblaw.com'
+username = 'Cutest636225'
+email = 'topice5948@chansd.com'
 
 password = os.getenv("PASSWORD")
 class HackerIOBot:
@@ -26,6 +31,8 @@ class HackerIOBot:
         self.wait = None
         self.saved_words_OCR = self.load_saved_words_OCR()
         self.fails = 0
+        self.auto_bot_running = False
+        self.stop_key_pressed = False
 
     def setup_driver(self):
         """Initialize and configure the Chrome WebDriver"""
@@ -70,7 +77,7 @@ class HackerIOBot:
         except Exception as e:
             print(f"Error saving word pair: {e}")
 
-    def login(self, unknown=False):
+    def login(self, unknown=True):
         """Handle the login process"""
         self.wait = WebDriverWait(self.driver, 5)
         if unknown:
@@ -297,7 +304,7 @@ class HackerIOBot:
             for char in word:
                 input_field.send_keys(char)
                 if is_npc:
-                    time.sleep(0.01)
+                    time.sleep(0.08)
                 else:
                     time.sleep(random.uniform(0.08, 0.15))  # Increased typing speed
             
@@ -419,7 +426,7 @@ class HackerIOBot:
     def hack_loop(self, is_npc):
         """Main hacking loop"""
         self.fails = 0
-        break_time = 0.1 if is_npc else 1.3
+        break_time = 0.7 if is_npc else 1.3
         while True:
             try:
                 # Try to handle 'Ok, cool' button if present
@@ -474,14 +481,18 @@ class HackerIOBot:
             except Exception as e:
                 print(f"Error in hack loop: {e}")
                 return
-    
+
     def auto_bot(self):
         """Auto-bot method with anti-ban measures"""
-        while True:
+        self.auto_bot_running = True
+        self.check_stop_key()  # Start listener
+        while self.auto_bot_running and not self.stop_key_pressed:
             # Random number of hacks per session
             num_hacks = random.randint(3, 5)
             
             for _ in range(num_hacks):
+                if self.stop_key_pressed:
+                    break
                 is_npc = self.select_target()
                 self.random_delay(0.1, 1)  # Reduced delay between targets
                 
@@ -493,6 +504,9 @@ class HackerIOBot:
                     print("Skipping to next target...")
                     self.close_window()
                 
+            if self.stop_key_pressed:
+                break
+
             # Take rewards and items
             self.take_all()
             self.random_delay(0.1, 0.2)  # Reduced delay after taking rewards
@@ -504,9 +518,9 @@ class HackerIOBot:
             self.random_delay(0.1, 0.2)  # Reduced close window delay
             
             # Add random breaks between sessions
-            if is_npc :
-                break_time = 0.1
-            else :
+            if is_npc:
+                break_time = 5
+            else:
                 break_time = random.uniform(5, 13)  # Reduced break time
             print(f"Taking a break for {break_time:.1f} seconds...")
             sleep(break_time)
@@ -514,25 +528,45 @@ class HackerIOBot:
             if random.random() < 0.4:
                 self.refresh_and_relogin()
 
+    
+    def stop_auto_bot(self):
+        """Stop the auto-bot"""
+        self.auto_bot_running = False
+
+    def on_press(self, key):
+        try:
+            if key.char == 'e':  # Change 'e' to your desired stop key if necessary
+                print("Stop key ('e') pressed. Stopping auto-bot...")
+                self.stop_auto_bot()
+                self.stop_key_pressed = True
+        except AttributeError:
+            pass
+    
+    def check_stop_key(self):
+        """Start a listener for the stop key."""
+        listener = keyboard.Listener(on_press=self.on_press)
+        listener.start()
+
     def run_interactive(self):
         """Interactive main method with anti-ban measures"""
         self.setup_driver()
         self.login()
         try:
-            while True:
+            self.check_stop_key()  # Start listener
+            while not self.stop_key_pressed:
                 command = input("\nCommands:\n"
-                              "t - Take all rewards\n"
-                              "h - Start hack and loop\n"
-                              "c - Close window\n"
-                              "s - Select target\n"
-                              "r - Refresh and relogin\n"
-                              "g - Click green button\n"
-                              "l - Grab agent loots\n"
-                              "a - Activate auto-bot\n"
-                              "q - Quit\n"
-                              "Enter command: ").lower()
+                            "t - Take all rewards\n"
+                            "h - Start hack and loop\n"
+                            "c - Close window\n"
+                            "s - Select target\n"
+                            "r - Refresh and relogin\n"
+                            "g - Click green button\n"
+                            "l - Grab agent loots\n"
+                            "a - Activate auto-bot\n"
+                            "q - Quit\n"
+                            "Enter command: ").lower()
 
-                if 'command' == 'h':
+                if command == 'h':
                     number_of_hacks = input("How many hacks to do? ")
                     for _ in range(int(number_of_hacks)):
                         if self.driver:
@@ -602,6 +636,7 @@ class HackerIOBot:
             if self.driver:
                 self.driver.quit()
                 print("Browser closed due to error")
+
 
     def simulate_human_mouse_movement(self, target_element):
         """Simulate human-like mouse movement to a target element"""
