@@ -51,6 +51,7 @@ class HackerIOBot:
         self.saved_words_OCR = self.load_saved_words_OCR()
         self.fails = 0
         self.run_auto_bot = False
+        self.auto_up = False
 
     def setup_driver(self):
         """Initialize and configure the Chrome WebDriver"""
@@ -531,6 +532,10 @@ class HackerIOBot:
                     self.hack_loop(is_npc)
                     print("Hack complete")
                     self.random_delay(0.5, 2)  # Reduced delay after hack
+
+                    # Take rewards and items
+                    self.take_all()
+                    self.random_delay(0.1, 0.2)
                 else:
                     print("Skipping to next target...")
                     self.close_window()
@@ -546,11 +551,12 @@ class HackerIOBot:
             self.close_window()
             self.random_delay(0.1, 0.2)
 
-            self.up_agents()
-            self.random_delay(0.1, 0.2)
+            if self.auto_up:
+                self.up_agents()
+                self.random_delay(0.1, 0.2)
 
-            self.close_window()
-            self.random_delay(0.1, 0.2)
+                self.close_window()
+                self.random_delay(0.1, 0.2)
             
             # Add random breaks between sessions
             if is_npc :
@@ -560,7 +566,7 @@ class HackerIOBot:
             print(f"Taking a break for {break_time:.1f} seconds...")
             sleep(break_time)
 
-            if random.random() < 0.4:
+            if random.random() < 0.01:
                 self.refresh_and_relogin()
 
 

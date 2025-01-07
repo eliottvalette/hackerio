@@ -12,3 +12,276 @@ OVetri -- over
  -- 
 HoOOoL -- hotspotControl
  -- 
+ -- 
+ -- 
+atmL -- atm
+nie -- net
+uUsSeclL -- syscall
+ -- 
+ -- 
+uUsSeclL -- syscall
+ -- 
+Hext -- text
+ -- 
+Hext -- text
+ -- 
+nteie -- newline
+nteie -- newline
+Ln -- long
+ -- 
+ela -- else
+LU -- LU
+Lfcallt -- call
+Hext -- text
+eriuill -- eriuill
+LU -- LU
+ -- 
+LU -- LU
+ -- 
+ttl -- ttl
+ttl -- ttl
+ -- 
+eriuill -- eriuill
+ -- 
+ -- 
+ -- 
+ela -- else
+ -- 
+ -- 
+ -- 
+ -- 
+ttl -- ttl
+tTast -- test
+ntsie -- size
+ -- 
+ -- 
+atnL -- StnL
+atnL -- StnL
+tTast -- test
+tTast -- test
+ -- 
+Lcalli -- call
+aqir -- aqir
+aqir -- aqir
+yLOCV -- lock
+ -- 
+ein -- in
+Ltl -- lil
+ein -- in
+eriuil -- eriuill
+wLoOV -- loop
+ela -- else
+Hext -- text
+routerCig -- routerCtg
+SsOapy -- say
+nisele -- newline
+wLoOV -- loop
+ -- 
+ -- 
+LLtl -- LLtl
+LTecy -- LTecy
+SsOapy -- say
+url -- url
+ -- 
+aqir -- aqir
+url -- url
+ -- 
+aqir -- aqir
+ -- 
+LTecy -- LTecy
+trojanhrs -- trojanVirus
+thisea -- this
+ -- 
+ -- 
+ -- 
+ -- 
+ -- 
+UISsSelL -- UISsSelL
+ -- 
+Lcalll -- call
+ -- 
+ -- 
+aqump -- jump
+ -- 
+nite -- init
+processol -- process
+ -- 
+Ln -- long
+thi -- this
+hHext -- text
+Lfalyh -- fail
+Lfalyh -- fail
+ -- 
+userAgent -- defragment
+ -- 
+WwAaALt -- WwAaALt
+hHext -- text
+ -- 
+routerCtg -- routerCtg
+trojanhrs -- trojanVirus
+Pamela -- Pamela
+ -- 
+SCAT -- stat
+V1LEeEW -- V1LEeEW
+Lfalyh -- fail
+yoo -- yoo
+nie -- net
+ -- 
+Pamela -- Pamela
+ -- 
+Hpotnet -- hotspot
+Lfalyh -- fail
+ -- 
+eile -- file
+eile -- file
+ort -- port
+nieie -- newline
+Hext -- text
+Hext -- text
+VLoOV -- loop
+ -- 
+userAgent -- defragment
+StnL -- StnL
+ -- 
+LU -- LU
+UISsSelL -- UISsSelL
+nteie -- newline
+ -- 
+un -- run
+Ppaetial -- Ppaetial
+ -- 
+ -- 
+ -- 
+url -- url
+ -- 
+V1LEeEW -- V1LEeEW
+thi -- this
+Hext -- text
+thi -- this
+Ppaetial -- Ppaetial
+Laln -- global
+ -- 
+url -- url
+ -- 
+url -- url
+V1LEeEW -- V1LEeEW
+Lcallt -- call
+VWLOCECSSOL -- VWLOCECSSOL
+ -- 
+ -- 
+Li -- lil
+nh -- nh
+ -- 
+DS -- dos
+Lcallt -- call
+bruteForce -- Bruteforce
+ -- 
+trojanHrs -- trojanVirus
+nile -- file
+urTL -- url
+ -- 
+ericillyy -- eriuill
+Tur -- url
+Hpotnet -- hotspot
+Keypair -- KeyPair
+ela -- else
+Keylogger -- keyLogger
+ -- 
+portScanning -- portscanning
+eriuilll -- eriuill
+eriuilll -- eriuill
+Hpotnet -- hotspot
+ -- 
+ -- 
+ -- 
+yoo -- yoo
+eriui -- eriuill
+Tain -- in
+yoo -- yoo
+ -- 
+ -- 
+usSciITnane -- virusScan
+ -- 
+portscanning -- portscanning
+intrusionDetected -- intrusionDetected
+wAaALTt -- wAaALTt
+ -- 
+ -- 
+sielebal -- slelehal
+eriuil -- eriuill
+ -- 
+vyoLa -- vyoLa
+Lfallt -- fault
+Lfallt -- fault
+ -- 
+ -- 
+ -- 
+atmL -- atm
+vyoLa -- vyoLa
+ -- 
+Hpotnet -- hotspot
+ -- 
+ -- 
+V1LEeEW -- V1LEeEW
+ttl -- ttl
+LTecy -- LTecy
+sal -- val
+ -- 
+vyoLa -- vyoLa
+ -- 
+WLOV -- WLOV
+eriuit -- eriuill
+atmL -- atm
+hsad -- thread
+ -- 
+this -- this
+atmL -- atm
+atmL -- atm
+LTecy -- LTecy
+ -- 
+nisie -- size
+ -- 
+Overt -- over
+un -- run
+ -- 
+this -- this
+ -- 
+Lfalyt -- fault
+sessionlimeout -- responderTimeout
+nh -- nh
+enuil -- null
+ -- 
+ -- 
+UsSCiraiic -- UsSCiraiic
+Lfalyt -- fault
+nAac -- nAac
+atmL -- atm
+url -- url
+patina -- ping
+ -- 
+patina -- ping
+url -- url
+ttl -- ttl
+ericuill -- eriuill
+ -- 
+atmL -- atm
+urTL -- url
+ -- 
+HoOOoL -- hotspotControl
+VLOoV -- loop
+HoOOoL -- hotspotControl
+LTecy -- LTecy
+Savyc -- say
+eriuil -- eriuill
+Keylogger -- keyLogger
+ort -- port
+thisea -- this
+ort -- port
+nh -- nh
+ -- 
+ort -- port
+ -- 
+ -- 
+yLOV -- yLOV
+vyoLa -- vyoLa
+ -- 
