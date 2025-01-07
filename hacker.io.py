@@ -21,8 +21,8 @@ import threading
 
 
 load_dotenv()
-username = 'Cutie160053'
-email = 'sitif93205@pofmagic.com'
+username = 'Tryhard144168'
+email = 'hixosak899@pofmagic.com'
 
 password = os.getenv("PASSWORD")
 
@@ -241,8 +241,14 @@ class HackerIOBot:
                 # Sort targets: NPCs first, then by level
                 valid_targets.sort(key=get_target_level)
                 
-                # Select first target (NPC or lowest level)
-                selected_target = valid_targets[0]
+                # Select first target if NPC else, select random target
+                if "NPC" in valid_targets[0].text:
+                    selected_target = valid_targets[0]
+                else :
+                    selected_target = random.choice(valid_targets[:10])
+            
+            else :
+                selected_target = targets[0]
 
             if selected_target:
                 is_npc = "NPC" in selected_target.text
