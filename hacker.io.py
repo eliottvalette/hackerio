@@ -223,11 +223,12 @@ class HackerIOBot:
                 
                 # Check conditions
                 has_level = target_parts[0].isdigit()  # Check if first part is a level
+                lvl = int(target_parts[0]) if has_level else 0
                 has_cooldown = any(part[:-1].isdigit() and part[-1] in ['m', 's'] for part in target_parts)  # Check for cooldown times
                 is_vash = "Vash" in target_parts
                 is_you = "(you)" in target_parts
                 
-                if has_level and not has_cooldown and not is_you and not is_vash:
+                if has_level and not has_cooldown and not is_you and not is_vash and lvl < 45:
                     valid_targets.append(target)
             
             # Save target details to a file for debugging
@@ -473,6 +474,15 @@ class HackerIOBot:
 
         except Exception as e:
             print(f"Error closing window: {e}")
+    
+    def check_mail_window(self):
+        """Check if mail window is open"""
+        try:
+            # Look for a window with mail icon and title
+            mail_windows = self.driver.find_elements(By.XPATH, "//div[contains(@class, 'window')]//img[contains(@src, 'mail.svg')]/ancestor::div[contains(@class, 'window')]")
+            return len(mail_windows) > 0
+        except:
+            return False
 
     def hack_loop(self, is_npc):
         """Main hacking loop"""
@@ -536,10 +546,16 @@ class HackerIOBot:
     def auto_bot(self):
         """Auto-bot method with anti-ban measures"""
         while self.run_auto_bot:
+
             # Random number of hacks per session
             num_hacks = random.randint(3, 5)
             
             for _ in range(num_hacks):
+                if self.check_mail_window():
+                    print("Mail window detected - stopping auto bot...")
+                    self.run_auto_bot = False
+                    return
+            
                 is_npc = self.select_target()
                 
                 if self.start_hack():
