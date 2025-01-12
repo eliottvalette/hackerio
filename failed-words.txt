@@ -524,3 +524,6 @@ networkNodes -- netwonetworkNodesrks
 eriuit -- eriuill
 help -- help
 nite -- init
+HoOOoL -- hotspotControl
+epu -- gpu
+VLOV -- VLOV

@@ -19,10 +19,9 @@ import math
 from time import sleep
 import threading
 
-
 load_dotenv()
-username = 'Tryhard144168'
-email = 'hixosak899@pofmagic.com'
+username = 'Enjoy1497379'
+email = 'sagapi5068@sfxeur.com'
 
 password = os.getenv("PASSWORD")
 
@@ -59,6 +58,15 @@ class HackerIOBot:
             # Initialize Chrome options
             chrome_options = Options()
             chrome_options.add_argument("--start-maximized")
+            chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+            chrome_options.add_argument("--disable-infobars")
+            chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            chrome_options.add_experimental_option('useAutomationExtension', False)
+            
+            # Randomize window size slightly
+            width = random.randint(1280, 1366)
+            height = random.randint(768, 900)
+            chrome_options.add_argument(f"--window-size={width},{height}")
             
             # Initialize Chrome driver
             self.driver = webdriver.Chrome(options=chrome_options)
@@ -330,7 +338,7 @@ class HackerIOBot:
             for char in word:
                 input_field.send_keys(char)
                 if is_npc:
-                    time.sleep(0.08)
+                    time.sleep(random.uniform(0.08, 0.1))
                 else:
                     time.sleep(random.uniform(0.08, 0.15))  # Increased typing speed
             
@@ -469,7 +477,7 @@ class HackerIOBot:
     def hack_loop(self, is_npc):
         """Main hacking loop"""
         self.fails = 0
-        break_time = 0.8 if is_npc else 1.3
+        break_time = 1.3
         while True:
             try:
                 # Try to handle 'Ok, cool' button if present
@@ -566,7 +574,7 @@ class HackerIOBot:
             
             # Add random breaks between sessions
             if is_npc :
-                break_time = random.uniform(2, 3)
+                break_time = random.uniform(4, 6)
             else :
                 break_time = random.uniform(5, 13)  # Reduced break time
             print(f"Taking a break for {break_time:.1f} seconds...")
