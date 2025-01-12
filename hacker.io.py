@@ -253,7 +253,7 @@ class HackerIOBot:
                 if "NPC" in valid_targets[0].text:
                     selected_target = valid_targets[0]
                 else :
-                    selected_target = random.choice(valid_targets[:10])
+                    selected_target = random.choice(valid_targets[:6])
             
             else :
                 selected_target = targets[0]
