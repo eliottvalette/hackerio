@@ -906,7 +906,7 @@
     "sessiontimeout": "sessionTimeout",
     "hbotnet": "botnet",
     "this": "this",
-    "ort": "port",
+    "ort": "off",
     "hode": "node",
     "spywale": "spyware",
     "zerovay": "zeroDay",
@@ -1279,5 +1279,14 @@
     "hreatDetection": "threatDetection",
     "USeCLnanhie": "username",
     "Lernsoriwale": "ransomware",
-    "trojanHrs": "trojanHrs"
+    "trojanHrs": "trojanHrs",
+    "sessionTlimeout": "sessionTimeout",
+    "uUnLxX": "unix",
+    "ransomwarenit": "ransomwareHit",
+    "networkTratfic": "networkTraffic",
+    "pruteForce": "bruteForce",
+    "macSpooring": "macSpoofing",
+    "LnNtrusion": "intrusion",
+    "TAansonwaLle": "ransomware",
+    "crimerreventiLon": "crimePrevention"
 }
