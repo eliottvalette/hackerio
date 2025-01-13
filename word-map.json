@@ -435,7 +435,6 @@
     "ipiracing": "ipTracing",
     "dualLBoot": "dualBoot",
     "duallboot": "dualBoot",
-    "LiteAtterCrime": "liteAfterCrime",
     "liteattercrime": "liteAfterCrime",
     "downLoader": "downloader",
     "Hpotnet": "hotspot",
@@ -998,7 +997,6 @@
     "prisontranster": "prisonTransfer",
     "SsOap": "soap",
     "Fflioat": "float",
-    "eis": "yes",
     "naLintrame": "mainframe",
     "Hack": "hack",
     "gsuiltyVerdict": "guiltyVerdict",
@@ -1269,5 +1267,13 @@
     "tnt": "html",
     "forgivenessSeek": "forgivenessSeek",
     "wealic": "walk",
-    "usSecrinamne": "username"
+    "usSecrinamne": "username",
+    "derragment": "defragment",
+    "routerCrg": "routerCrg",
+    "LiteAtterCrime": "LifeAfterCrime",
+    "userAgent":"userAgent0",
+    "trojyannArs": "trojanHrs",
+    "TirewallState": "firewallState",
+    "ex1t": "exit",
+    "eis":"on"
 }
