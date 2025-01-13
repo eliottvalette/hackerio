@@ -65,3 +65,5 @@ Lfallh -- fail
  -- 
  -- 
 Tur -- url
+HoOOoL -- hotspotControl
+eis -- yes

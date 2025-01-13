@@ -890,7 +890,7 @@
     "enuin": "enum",
     "evidenceollect": "evidenceCollect",
     "wormvirus": "wormVirus",
-    "": "",
+    "": "recv",
     "gateway": "gateway",
     "vpntonnection": "vpnConnection",
     "virusintfection": "virusInfection",
@@ -1268,5 +1268,6 @@
     "Hext": "next",
     "tnt": "html",
     "forgivenessSeek": "forgivenessSeek",
-    "wealic": "walk"
+    "wealic": "walk",
+    "usSecrinamne": "username"
 }
