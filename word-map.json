@@ -1251,5 +1251,17 @@
     "sch": "ssh",
     "fijrewallRules": "firewallRules",
     "wniiteList": "whitelist",
-    "ansSpoof": "dnsSpoof"
+    "ansSpoof": "dnsSpoof",
+    "lifeAftterCrime": "lifeAfterCrime",
+    "dansSpoof": "dnsSpoof",
+    "CLONPy": "copy",
+    "decryptionKkKey": "decryptionKey",
+    "evidenceCoLLlLect": "evidenceCollect",
+    "cdosAttackCount": "dosAttackCount",
+    "serverLlog": "serverLog",
+    "witihHack": "wifiHack",
+    "dnsSpoor": "dnsSpoof",
+    "HbotnetControl": "botnetControl",
+    "intrusionrrevent": "intrusionPrevent",
+    "UusSecinane": "username"
 }
