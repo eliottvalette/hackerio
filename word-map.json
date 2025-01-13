@@ -1269,11 +1269,15 @@
     "wealic": "walk",
     "usSecrinamne": "username",
     "derragment": "defragment",
-    "routerCrg": "routerCrg",
+    "routerCrg": "routerCtg",
     "LiteAtterCrime": "LifeAfterCrime",
-    "userAgent":"userAgent0",
+    "userAgent": "userAgent0",
     "trojyannArs": "trojanHrs",
     "TirewallState": "firewallState",
     "ex1t": "exit",
-    "eis":"on"
+    "eis": "on",
+    "hreatDetection": "threatDetection",
+    "USeCLnanhie": "username",
+    "Lernsoriwale": "ransomware",
+    "trojanHrs": "trojanHrs"
 }
