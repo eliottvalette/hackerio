@@ -1263,5 +1263,8 @@
     "dnsSpoor": "dnsSpoof",
     "HbotnetControl": "botnetControl",
     "intrusionrrevent": "intrusionPrevent",
-    "UusSecinane": "username"
+    "UusSecinane": "username",
+    "thisea": "user",
+    "Hext": "next",
+    "tnt":"html"
 }
