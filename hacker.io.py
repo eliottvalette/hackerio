@@ -592,7 +592,7 @@ class HackerIOBot:
             if is_npc :
                 break_time = random.uniform(4, 6)
             else :
-                break_time = random.uniform(5, 13)  # Reduced break time
+                break_time = random.uniform(15, 18)  # Reduced break time
             print(f"Taking a break for {break_time:.1f} seconds...")
             sleep(break_time)
 
@@ -618,7 +618,7 @@ class HackerIOBot:
                               "q - Quit\n"
                               "Enter command: ").lower()
 
-                if 'command' == 'h':
+                if command == 'h':
                     number_of_hacks = input("How many hacks to do? ")
                     for _ in range(int(number_of_hacks)):
                         if self.driver:
