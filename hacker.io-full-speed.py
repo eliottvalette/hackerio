@@ -20,9 +20,9 @@ from time import sleep
 import threading
 
 load_dotenv()
-username = 'Enjoy1497379'
-email = 'sagapi5068@sfxeur.com'
 
+username = os.getenv("USERNAME")
+email = os.getenv("EMAIL")
 password = os.getenv("PASSWORD")
 
 def input_with_timeout(prompt, timeout):
