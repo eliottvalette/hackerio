@@ -906,7 +906,7 @@
     "sessiontimeout": "sessionTimeout",
     "hbotnet": "botnet",
     "this": "this",
-    "ort": "off",
+    "ort": "port",
     "hode": "node",
     "spywale": "spyware",
     "zerovay": "zeroDay",
@@ -1288,5 +1288,13 @@
     "macSpooring": "macSpoofing",
     "LnNtrusion": "intrusion",
     "TAansonwaLle": "ransomware",
-    "crimerreventiLon": "crimePrevention"
+    "crimerreventiLon": "crimePrevention",
+    "packetSniit": "packetSniff",
+    "Ppyware": "spyware",
+    "lLoginAttempts": "loginAttempts",
+    "nmaLwareScan": "malwareScan",
+    "SUOapP": "soap",
+    "DASS": "pass",
+    "UsSeTLTnanie": "username",
+    "USeL": "user"
 }
