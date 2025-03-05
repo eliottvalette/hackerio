@@ -6,8 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.keys import Keys
 from OCR import extract_text_from_base64_image
-
 from dotenv import load_dotenv
 
 import os
@@ -195,116 +195,76 @@ class HackerIOBot:
             print(f"Error refreshing and relogging: {e}")
 
     def select_target(self):
-        """Select a valid target to hack based on criteria."""
+        """Select a valid target to hack based on criteria (minimal wait)."""
         try:
             time.sleep(0.1)
             
-            # Click target list button with a more precise selector
-            target_list_button = self.wait.until(EC.element_to_be_clickable(
-                (By.XPATH, "//img[contains(@src, 'targetList.svg')]/ancestor::button | //div[text()='Target List']")
-            ))
-            self.driver.execute_script("arguments[0].click();", target_list_button)
+            # Click target list
+            target_list = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Target List']")))
+            self.driver.execute_script("arguments[0].click();", target_list)
             time.sleep(0.1)
             
-            # Get the target list container
-            try:
-                # Try first with ID
-                target_list_container = self.wait.until(EC.presence_of_element_located((By.ID, 'list')))
-            except:
-                # Fallback to class if ID changed
-                target_list_container = self.wait.until(EC.presence_of_element_located(
-                    (By.XPATH, "//div[contains(@class, 'window')]//div[contains(@class, 'list')]")
-                ))
-            
-            # Get all target elements with improved selector
-            targets = target_list_container.find_elements(
-                By.XPATH, ".//div[contains(@class, 'wrapper')]"
-            )
-            
-            print(f"Found {len(targets)} potential targets")
+            # Locate targets
+            real_target_list = self.wait.until(EC.presence_of_element_located((By.ID, 'list')))
+            targets = real_target_list.find_elements(By.XPATH, "./div")
+
             valid_targets = []
             
-            # Filter targets with better criteria
+            # Filter targets
             for target in targets:
-                try:
-                    target_text = target.text.strip()
-                    
-                    # Skip empty or irrelevant targets
-                    if not target_text or len(target_text) < 2:
-                        continue
-                    
-                    # Check if target is "you"
-                    is_you = "(you)" in target_text
-                    if is_you:
-                        continue
-                    
-                    # Check rank/level elements
-                    try:
-                        rank_img = target.find_element(By.XPATH, ".//img[contains(@src, 'ranks/')]")
-                        rank_text = rank_img.find_element(By.XPATH, "./following-sibling::div").text
-                        level = int(rank_text)
-                    except:
-                        level = 999  # Default high level if can't determine
-                    
-                    # Check for cooldown
-                    has_cooldown = any(part[-1] in ['m', 's'] and part[:-1].isdigit() 
-                                      for part in target_text.split() if len(part) > 1)
-                    
-                    # Check for NPC status
-                    is_npc = "NPC" in target_text or "Anon" in target_text
-                    
-                    # Check if target has a country flag (may indicate real player)
-                    has_flag = len(target.find_elements(By.XPATH, ".//img[contains(@src, 'flags/')]")) > 0
-                    
-                    # Add score-based selection (lower is better)
-                    score = 0
-                    if is_npc:
-                        score -= 50  # Strongly prefer NPCs
-                    if has_flag:
-                        score += 10  # Slightly avoid players with flags
-                    score += level   # Prefer lower levels
-                    if has_cooldown:
-                        score += 100  # Strongly avoid cooldown targets
-                    
-                    # Only add valid targets
-                    if score < 45 and not has_cooldown:
-                        valid_targets.append((target, score, is_npc, level))
-                        
-                except Exception as e:
-                    print(f"Error analyzing target: {e}")
+                target_text = target.text.strip()
+                if not target_text:
                     continue
+
+                target_parts = target_text.split()
+                
+                # Check conditions
+                has_level = target_parts[0].isdigit()
+                lvl = int(target_parts[0]) if has_level else 0
+                has_cooldown = any(part[:-1].isdigit() and part[-1] in ['m', 's'] for part in target_parts)
+                is_vash = "Vash" in target_parts
+                is_you = "(you)" in target_parts
+                
+                if has_level and not has_cooldown and not is_you and not is_vash and lvl < 45:
+                    valid_targets.append(target)
             
-            # Debug info
-            print(f"Found {len(valid_targets)} valid targets after filtering")
+            # Save targets for debugging
+            with open('valid_targets.txt', 'w') as f:
+                for t in valid_targets:
+                    f.write(f"{t.text}\n")
             
-            # Select the best target
             if valid_targets:
-                # Sort by score (lower is better)
-                valid_targets.sort(key=lambda x: x[1])
+                selected_target = None
+                def get_target_level(t):
+                    parts = t.text.strip().split()
+                    try:
+                        return (0 if "NPC" in parts else 1, int(parts[0]))
+                    except:
+                        return (1, 999)
                 
-                # Add some randomness to avoid patterns
-                if len(valid_targets) > 1 and random.random() < 0.2:
-                    # Sometimes pick second best
-                    selected_target, _, is_npc, level = valid_targets[1]
+                valid_targets.sort(key=get_target_level)
+                
+                # If first is NPC, pick it, else random from the first 6
+                if "NPC" in valid_targets[0].text:
+                    selected_target = valid_targets[0]
                 else:
-                    selected_target, _, is_npc, level = valid_targets[0]
-                
-                print(f"Selected target (Level {level}, NPC: {is_npc}): {selected_target.text}")
+                    selected_target = random.choice(valid_targets[:6])
+            else:
+                # If no valid targets, default to the first
+                selected_target = targets[0]
+
+            if selected_target:
+                is_npc = "NPC" in selected_target.text
                 self.driver.execute_script("arguments[0].click();", selected_target)
+                print(f"Selected target: {selected_target.text}")
                 time.sleep(0.1)
                 return is_npc
             else:
-                print("No valid targets found, trying to pick first available")
-                if targets:
-                    is_npc = "NPC" in targets[0].text or "Anon" in targets[0].text
-                    self.driver.execute_script("arguments[0].click();", targets[0])
-                    return is_npc
+                print("No valid targets found")
                 return False
-                
         except Exception as e:
             print(f"Error selecting target: {e}")
             self.close_window()
-            return False
 
     def start_hack(self):
         """Initiate the hacking process"""
@@ -393,6 +353,16 @@ class HackerIOBot:
                 
                 input_field.send_keys(char)
                 time.sleep(current_delay)
+
+                if random.random() < 0.1:
+                    # Type a wrong character and delete it
+                    wrong_char = random.choice('abcdefghijklmnopqrstuvwxyz')
+                    input_field.send_keys(wrong_char)
+                    time.sleep(current_delay)
+                    input_field.send_keys(Keys.BACK_SPACE)
+                    time.sleep(current_delay)
+
+
             
             # Random delay before clicking submit (as humans do)
             time.sleep(random.uniform(0.1, 0.3))
