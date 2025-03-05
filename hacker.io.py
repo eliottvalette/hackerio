@@ -199,80 +199,112 @@ class HackerIOBot:
         try:
             time.sleep(0.1)
             
-            # Click target list
-            target_list = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//div[text()='Target List']")))
-            self.driver.execute_script("arguments[0].click();", target_list)
+            # Click target list button with a more precise selector
+            target_list_button = self.wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//img[contains(@src, 'targetList.svg')]/ancestor::button | //div[text()='Target List']")
+            ))
+            self.driver.execute_script("arguments[0].click();", target_list_button)
             time.sleep(0.1)
             
-            # Locate targets
-            real_target_list = self.wait.until(EC.presence_of_element_located((By.ID, 'list')))
-            targets = real_target_list.find_elements(By.XPATH, "./div")
-
+            # Get the target list container
+            try:
+                # Try first with ID
+                target_list_container = self.wait.until(EC.presence_of_element_located((By.ID, 'list')))
+            except:
+                # Fallback to class if ID changed
+                target_list_container = self.wait.until(EC.presence_of_element_located(
+                    (By.XPATH, "//div[contains(@class, 'window')]//div[contains(@class, 'list')]")
+                ))
+            
+            # Get all target elements with improved selector
+            targets = target_list_container.find_elements(
+                By.XPATH, ".//div[contains(@class, 'wrapper')]"
+            )
+            
+            print(f"Found {len(targets)} potential targets")
             valid_targets = []
             
-            # Filter targets
+            # Filter targets with better criteria
             for target in targets:
-                target_text = target.text.strip()
-                
-                # Skip empty or irrelevant targets
-                if not target_text:
-                    continue
-                
-                # Split target details
-                target_parts = target_text.split()
-                
-                # Check conditions
-                has_level = target_parts[0].isdigit()  # Check if first part is a level
-                lvl = int(target_parts[0]) if has_level else 0
-                has_cooldown = any(part[:-1].isdigit() and part[-1] in ['m', 's'] for part in target_parts)  # Check for cooldown times
-                is_vash = "Vash" in target_parts
-                is_you = "(you)" in target_parts
-                
-                if has_level and not has_cooldown and not is_you and not is_vash and lvl < 45:
-                    valid_targets.append(target)
-            
-            # Save target details to a file for debugging
-            with open('valid_targets.txt', 'w') as f:
-                for target in valid_targets:
-                    f.write(f"{target.text}\n")
-            
-            # Choose NPC target, if not select the one with the lowest level
-            if valid_targets:
-                selected_target = None
-                # Sort targets by NPC status and level
-                def get_target_level(target):
-                    parts = target.text.strip().split()
+                try:
+                    target_text = target.text.strip()
+                    
+                    # Skip empty or irrelevant targets
+                    if not target_text or len(target_text) < 2:
+                        continue
+                    
+                    # Check if target is "you"
+                    is_you = "(you)" in target_text
+                    if is_you:
+                        continue
+                    
+                    # Check rank/level elements
                     try:
-                        return (0 if "NPC" in parts else 1, int(parts[0]))
+                        rank_img = target.find_element(By.XPATH, ".//img[contains(@src, 'ranks/')]")
+                        rank_text = rank_img.find_element(By.XPATH, "./following-sibling::div").text
+                        level = int(rank_text)
                     except:
-                        return (1, 999)  # High number for invalid levels
-                
-                # Sort targets: NPCs first, then by level
-                valid_targets.sort(key=get_target_level)
-                
-                # Select first target if NPC else, select random target
-                if "NPC" in valid_targets[0].text:
-                    selected_target = valid_targets[0]
-                else :
-                    selected_target = random.choice(valid_targets[:6])
+                        level = 999  # Default high level if can't determine
+                    
+                    # Check for cooldown
+                    has_cooldown = any(part[-1] in ['m', 's'] and part[:-1].isdigit() 
+                                      for part in target_text.split() if len(part) > 1)
+                    
+                    # Check for NPC status
+                    is_npc = "NPC" in target_text or "Anon" in target_text
+                    
+                    # Check if target has a country flag (may indicate real player)
+                    has_flag = len(target.find_elements(By.XPATH, ".//img[contains(@src, 'flags/')]")) > 0
+                    
+                    # Add score-based selection (lower is better)
+                    score = 0
+                    if is_npc:
+                        score -= 50  # Strongly prefer NPCs
+                    if has_flag:
+                        score += 10  # Slightly avoid players with flags
+                    score += level   # Prefer lower levels
+                    if has_cooldown:
+                        score += 100  # Strongly avoid cooldown targets
+                    
+                    # Only add valid targets
+                    if score < 45 and not has_cooldown:
+                        valid_targets.append((target, score, is_npc, level))
+                        
+                except Exception as e:
+                    print(f"Error analyzing target: {e}")
+                    continue
             
-            else :
-                selected_target = targets[0]
-
-            if selected_target:
-                is_npc = "NPC" in selected_target.text
+            # Debug info
+            print(f"Found {len(valid_targets)} valid targets after filtering")
+            
+            # Select the best target
+            if valid_targets:
+                # Sort by score (lower is better)
+                valid_targets.sort(key=lambda x: x[1])
+                
+                # Add some randomness to avoid patterns
+                if len(valid_targets) > 1 and random.random() < 0.2:
+                    # Sometimes pick second best
+                    selected_target, _, is_npc, level = valid_targets[1]
+                else:
+                    selected_target, _, is_npc, level = valid_targets[0]
+                
+                print(f"Selected target (Level {level}, NPC: {is_npc}): {selected_target.text}")
                 self.driver.execute_script("arguments[0].click();", selected_target)
-                print(f"Selected target: {selected_target.text}")
                 time.sleep(0.1)
                 return is_npc
             else:
-                print("No valid targets found")
+                print("No valid targets found, trying to pick first available")
+                if targets:
+                    is_npc = "NPC" in targets[0].text or "Anon" in targets[0].text
+                    self.driver.execute_script("arguments[0].click();", targets[0])
+                    return is_npc
                 return False
+                
         except Exception as e:
             print(f"Error selecting target: {e}")
-            # Try to close any open windows
             self.close_window()
-
+            return False
 
     def start_hack(self):
         """Initiate the hacking process"""
@@ -317,34 +349,58 @@ class HackerIOBot:
 
     def process_word(self):
         """Process the word to be typed"""
-        word_div = self.wait.until(EC.presence_of_element_located((By.ID, 'word-to-type')))
-        word_img = word_div.find_element(By.TAG_NAME, "img")
-        img_src = word_img.get_attribute("src")
-
-        text, OCR_result = extract_text_from_base64_image(img_src)
-        return img_src, text, OCR_result
+        try:
+            # More specific and reliable selector based on the HTML structure
+            word_div = self.wait.until(EC.presence_of_element_located((By.ID, 'word-to-type')))
+            word_img = word_div.find_element(By.TAG_NAME, "img")
+            img_src = word_img.get_attribute("src")
+            
+            # Enhanced error handling for OCR
+            if not img_src:
+                print("Warning: No image source found")
+                return None, "", ""
+                
+            text, OCR_result = extract_text_from_base64_image(img_src)
+            
+            # Debug logging
+            print(f"OCR Result: '{OCR_result}', Matched Word: '{text}'")
+            
+            return img_src, text, OCR_result
+        except Exception as e:
+            print(f"Error processing word: {e}")
+            return None, "", ""
 
     def random_delay(self, min_delay=0.02, max_delay=0.1):
         """Add random delay between actions"""
         sleep(random.uniform(min_delay, max_delay))
 
-    def submit_word(self, word, is_npc):
+    def submit_word(self, word, typing_delay=0.08):
         """Submit the word with human-like typing"""
         try:
-            # Find and clear input field that has no placeholder
-            input_field = self.wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'input[name="input"][placeholder=""]')))
+            # Find input field with a more reliable selector
+            input_field = self.wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//input[@name='input'][@placeholder='']")
+            ))
             input_field.clear()
             
-            # Type word with delays
-            for char in word:
+            # More humanlike typing pattern with slight randomness
+            for i, char in enumerate(word):
+                # Slightly vary typing speed within a word
+                current_delay = typing_delay * (0.9 + random.random() * 0.2)
+                # Slow down slightly at beginning and end of words
+                if i < 2 or i > len(word) - 3:
+                    current_delay *= 1.2
+                
                 input_field.send_keys(char)
-                if is_npc:
-                    time.sleep(random.uniform(0.08, 0.1))
-                else:
-                    time.sleep(random.uniform(0.08, 0.15))  # Increased typing speed
+                time.sleep(current_delay)
             
-            # Click submit using JavaScript
-            submit_button = self.wait.until(EC.element_to_be_clickable((By.XPATH, "//button[text()='Enter']")))
+            # Random delay before clicking submit (as humans do)
+            time.sleep(random.uniform(0.1, 0.3))
+            
+            # Click submit using a better selector
+            submit_button = self.wait.until(EC.element_to_be_clickable(
+                (By.XPATH, "//button[text()='Enter']")
+            ))
             self.driver.execute_script("arguments[0].click();", submit_button)
             
         except Exception as e:
@@ -485,64 +541,182 @@ class HackerIOBot:
             return False
 
     def hack_loop(self, is_npc):
-        """Main hacking loop"""
+        """Main hacking loop with improved error handling and retry mechanisms"""
         self.fails = 0
-        break_time = 1.3
+        success_count = 0
+        retry_count = 0
+        max_retries = 3
+        break_time = 1.0 if is_npc else 1.3  # NPC can have slightly faster break time
+        
+        # Track start time to prevent excessive looping
+        start_time = time.time()
+        max_duration = 180  # Max 3 minutes in hack loop
+        
         while True:
+            # Exit if we've been in the loop too long
+            if time.time() - start_time > max_duration:
+                print("Hack loop time limit exceeded, exiting")
+                self.close_window()
+                return
+                
             try:
-                # Try to handle 'Ok, cool' button if present
-                try:
-                    ok_cool_button = self.driver.find_element(By.XPATH, "//button[text()='Ok, cool']")
-                    self.driver.execute_script("arguments[0].click();", ok_cool_button)
-                    time.sleep(0.1)
-                except:
-                    pass
+                # Handle various dialog boxes that might appear
+                self.handle_popups()
                 
                 # Get current tries
                 try:
                     old_tries = self.get_current_tries()
-                except:
-                    print("Could not get current tries, exiting hack loop")
-                    return
+                    print(f"Current tries: {old_tries}")
+                    if old_tries <= 0:
+                        print("No more tries left, exiting hack loop")
+                        self.close_window()
+                        return
+                except Exception as e:
+                    print(f"Could not get current tries: {e}")
+                    if retry_count < max_retries:
+                        retry_count += 1
+                        print(f"Retrying... ({retry_count}/{max_retries})")
+                        time.sleep(0.5)
+                        continue
+                    else:
+                        print("Max retries reached, exiting hack loop")
+                        self.close_window()
+                        return
                 
                 # Process word and submit
                 try:
                     img_src, word, OCR_result = self.process_word()
-                    self.submit_word(word, is_npc)
-                    time.sleep(break_time)
                     
-                    new_tries = self.get_current_tries()
+                    # If we couldn't get a word, retry
+                    if not img_src or not word:
+                        if retry_count < max_retries:
+                            retry_count += 1
+                            print(f"Failed to get word, retrying... ({retry_count}/{max_retries})")
+                            time.sleep(0.5)
+                            continue
+                        else:
+                            print("Max retries reached, exiting hack loop")
+                            self.close_window()
+                            return
                     
-                    if old_tries > new_tries:
-                        print("##### FAILED #####")
-                        with open('failed-words.txt', 'a') as f:
-                            f.write(f"{OCR_result} -- {word}\n")
-                        self.fails += 1
-                    else:
-                        print("##### SUCCESS #####")
-                        self.save_word_pair_OCR(OCR_result, word)
+                    # Reset retry counter after successful word processing
+                    retry_count = 0
+                    
+                    # Randomize typing speed slightly based on word length
+                    typing_delay = random.uniform(
+                        0.04 if is_npc else 0.06,  # Min delay
+                        0.08 if is_npc else 0.11   # Max delay
+                    )
+                    
+                    # Type the word with human-like timing
+                    self.submit_word(word, typing_delay)
+                    
+                    # Wait after submitting
+                    adaptive_break = break_time * (0.9 + random.random() * 0.2)  # ±10% randomness
+                    time.sleep(adaptive_break)
+                    
+                    # Verify result
+                    try:
+                        new_tries = self.get_current_tries()
+                        
+                        if old_tries > new_tries:
+                            print(f"##### FAILED WORD: '{word}' #####")
+                            with open('failed-words.txt', 'a') as f:
+                                f.write(f"{OCR_result} -- {word}\n")
+                            self.fails += 1
+                        else:
+                            print(f"##### SUCCESS WORD: '{word}' #####")
+                            self.save_word_pair_OCR(OCR_result, word)
+                            success_count += 1
+                            # Reduce break time slightly after consecutive successes for efficiency
+                            if success_count > 2 and break_time > 0.8:
+                                break_time -= 0.1
+                    except Exception as e:
+                        print(f"Error checking tries after submission: {e}")
+                        # If we can't verify, assume success to keep going
+                        pass
+                    
                 except Exception as e:
                     print(f"Error in word processing/submission: {e}")
-                    return
+                    if retry_count < max_retries:
+                        retry_count += 1
+                        print(f"Retrying... ({retry_count}/{max_retries})")
+                        time.sleep(0.5)
+                        continue
+                    else:
+                        print("Max retries reached, exiting hack loop")
+                        self.close_window()
+                        return
                 
                 # Check end conditions
-                if self.fails == 3:
-                    print("##### THE END (LOST) #####")
+                if self.fails >= 3:
+                    print("##### THE END (LOST) - Max fails reached #####")
                     self.close_window()
                     return
                 
                 try:
                     if self.check_progress():
-                        print("##### THE END (WON) #####")
+                        print(f"##### THE END (WON) after {success_count} successful words #####")
                         self.close_window()
                         return
-                except:
+                except Exception as e:
+                    print(f"Error checking progress: {e}")
+                    # If we can't check progress, continue hacking
                     pass
                 
             except Exception as e:
-                print(f"Error in hack loop: {e}")
-                return
-    
+                print(f"Unexpected error in hack loop: {e}")
+                if retry_count < max_retries:
+                    retry_count += 1
+                    print(f"Retrying... ({retry_count}/{max_retries})")
+                    time.sleep(0.5)
+                    continue
+                else:
+                    print("Max retries reached, exiting hack loop")
+                    self.close_window()
+                    return
+                    
+    def handle_popups(self):
+        """Handle various popups and dialogs that might appear"""
+        try:
+            # Try to handle 'Ok, cool' button
+            ok_buttons = self.driver.find_elements(By.XPATH, "//button[contains(text(), 'Ok') or contains(text(), 'OK') or contains(text(), 'Cool')]")
+            for button in ok_buttons:
+                if button.is_displayed():
+                    self.driver.execute_script("arguments[0].click();", button)
+                    time.sleep(0.1)
+                    print("Clicked an OK button")
+            
+            # Check for error messages
+            error_messages = self.driver.find_elements(By.XPATH, "//div[contains(@class, 'error') or contains(@class, 'alert')]")
+            for message in error_messages:
+                if message.is_displayed():
+                    print(f"Error message found: {message.text}")
+                    # Try to find and click any button to dismiss
+                    dismiss_buttons = self.driver.find_elements(By.XPATH, "//button")
+                    for button in dismiss_buttons:
+                        if button.is_displayed():
+                            self.driver.execute_script("arguments[0].click();", button)
+                            time.sleep(0.1)
+                            print("Clicked a button to dismiss error")
+            
+            # Check for achievement popups
+            achievement_popups = self.driver.find_elements(By.XPATH, "//div[contains(text(), 'Achievement') or contains(text(), 'Unlocked')]")
+            for popup in achievement_popups:
+                if popup.is_displayed():
+                    print(f"Achievement popup found: {popup.text}")
+                    # Try to close it
+                    close_buttons = self.driver.find_elements(By.XPATH, "//img[contains(@src, 'close.svg')]/ancestor::button")
+                    for button in close_buttons:
+                        if button.is_displayed():
+                            self.driver.execute_script("arguments[0].click();", button)
+                            time.sleep(0.1)
+                            print("Closed achievement popup")
+                            
+        except Exception as e:
+            print(f"Error handling popups: {e}")
+            # Don't raise - this is just a helper function
+            
     def auto_bot(self):
         """Auto-bot method with anti-ban measures"""
         while self.run_auto_bot:

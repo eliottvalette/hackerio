@@ -310,3 +310,17 @@ True -- true
 LTecy -- LTecy
 hod -- hod
 Overt -- over
+<<<<<<< HEAD
+=======
+a -- a
+nn -- anon
+an -- scan
+ee -- seek
+a -- a
+ee -- seek
+a -- a
+nn -- anon
+a -- a
+HoOOoL -- hotspotControl
+HoOOoL -- hotspotControl
+>>>>>>> 4e72f0c (rebase)
