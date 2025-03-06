@@ -334,8 +334,8 @@ class HackerIOBot:
         """Add random delay between actions"""
         sleep(random.uniform(min_delay, max_delay))
 
-    def submit_word(self, word, typing_delay=0.08):
-        """Submit the word with sophisticated human-like typing patterns"""
+    def submit_word(self, word, typing_delay):
+        """Submit the word with human-like typing"""
         try:
             # Find input field with a more reliable selector
             input_field = self.wait.until(EC.element_to_be_clickable(
@@ -343,214 +343,37 @@ class HackerIOBot:
             ))
             input_field.clear()
             
-            # Base typing delay adjusted for word complexity
-            word_complexity = self._calculate_word_complexity(word)
-            base_delay = typing_delay * (0.8 + word_complexity * 0.5)  # Harder words = slower typing
-            
-            # Initial thinking pause - longer for complex words
-            thinking_time = 0.2 + (word_complexity * random.uniform(0.2, 0.8))
-            time.sleep(thinking_time)
-            
-            # Track if we've made an error yet - humans tend to make more errors after first mistake
-            made_error = False
-            
-            # Sometimes type the first letter then pause (as if thinking or confirming)
-            if random.random() < 0.3 and len(word) > 3:
-                input_field.send_keys(word[0])
-                time.sleep(random.uniform(0.2, 0.5))
+            # More humanlike typing pattern with slight randomness
+            for i, char in enumerate(word):
+                # Slightly vary typing speed within a word
+                current_delay = typing_delay * (0.9 + random.random() * 0.2)
+                # Slow down slightly at beginning and end of words
+                if i < 2 or i > len(word) - 3:
+                    current_delay *= 1.2
                 
-            # Type the word with variable timing
-            i = 1 if random.random() < 0.3 and len(word) > 3 else 0
-            while i < len(word):
-                # Current character
-                char = word[i]
-                
-                # Determine typing speed for this character
-                if char in "qwertasdfgzxcvb":  # Left hand keys
-                    multiplier = random.uniform(0.85, 1.1)
-                elif char in "yuiophjklnm":  # Right hand keys
-                    multiplier = random.uniform(0.9, 1.15)
-                else:  # Special characters, numbers, etc.
-                    multiplier = random.uniform(1.1, 1.4)  # Slower for special chars
-                
-                # Slow down at complex character transitions
-                if i > 0:
-                    prev_char = word[i-1]
-                    # Typing digraphs like 'th', 'ch', 'ph' etc. tends to be faster
-                    common_digraphs = {'th', 'ch', 'ph', 'sh', 'wh', 'qu', 'ng', 'gh'}
-                    if prev_char + char in common_digraphs:
-                        multiplier *= 0.7  # Faster for common combinations
-                    
-                    # If moving from one side of keyboard to another, slow down slightly
-                    if (prev_char in "qwertasdfgzxcvb" and char in "yuiophjklnm") or \
-                       (prev_char in "yuiophjklnm" and char in "qwertasdfgzxcvb"):
-                        multiplier *= 1.2
-                
-                # Calculate final delay for this character
-                current_delay = base_delay * multiplier
-                
-                # Beginning and end of words tend to have different timing
-                if i < 2:  # Beginning of word - might be slightly slower
-                    current_delay *= random.uniform(1.0, 1.3)
-                elif i > len(word) - 3:  # End of word - can vary
-                    current_delay *= random.uniform(0.8, 1.2)
-                
-                # Type the character
                 input_field.send_keys(char)
                 time.sleep(current_delay)
-                
-                # Determine if we should make a typing error
-                # Error probability increases with word complexity and decreases with typing speed
-                error_probability = 0.05 + (word_complexity * 0.1)
-                
-                # If already made an error, slightly increase chance of another
-                if made_error:
-                    error_probability *= 1.5
-                    
-                # More likely to make errors in the middle of words than beginning/end
-                if 2 <= i <= len(word) - 3:
-                    error_probability *= 1.3
-                
-                # Introduce typing error
-                if random.random() < error_probability:
-                    made_error = True
-                    
-                    # Different types of errors
-                    error_type = random.choices(
-                        ['adjacent_key', 'double_key', 'skip_key', 'transpose'], 
-                        weights=[0.4, 0.3, 0.2, 0.1]
-                    )[0]
-                    
-                    if error_type == 'adjacent_key':
-                        # Press an adjacent key on keyboard
-                        keyboard_map = {
-                            'q': 'wa', 'w': 'qase', 'e': 'wsd', 'r': 'etf', 't': 'ryg', 'y': 'tuh', 'u': 'yij',
-                            'i': 'uok', 'o': 'iplk', 'p': 'ol', 'a': 'qzsw', 's': 'adwez', 'd': 'sfxer',
-                            'f': 'dgcrt', 'g': 'fhvty', 'h': 'gjbyu', 'j': 'hkni', 'k': 'jlmo', 'l': 'kp',
-                            'z': 'asx', 'x': 'zsdc', 'c': 'xdfv', 'v': 'cfgb', 'b': 'vghn', 'n': 'bhjm',
-                            'm': 'njk'
-                        }
-                        if char.lower() in keyboard_map:
-                            adjacent_keys = keyboard_map[char.lower()]
-                            wrong_char = random.choice(adjacent_keys)
-                            # Preserve case
-                            if char.isupper():
-                                wrong_char = wrong_char.upper()
-                            input_field.send_keys(wrong_char)
-                            time.sleep(random.uniform(0.1, 0.3))  # Pause before correction
-                            input_field.send_keys(Keys.BACK_SPACE)
-                            time.sleep(random.uniform(0.1, 0.2))
-                            input_field.send_keys(char)  # Type the correct char
-                            time.sleep(current_delay * 0.8)  # Slightly faster after correction
-                    
-                    elif error_type == 'double_key':
-                        # Accidentally press the same key twice
-                        input_field.send_keys(char)
-                        time.sleep(current_delay * 0.5)  # Faster for double press
-                        time.sleep(random.uniform(0.1, 0.3))  # Pause before correction
-                        input_field.send_keys(Keys.BACK_SPACE)
-                        time.sleep(random.uniform(0.1, 0.2))
-                    
-                    elif error_type == 'skip_key':
-                        # Skip ahead one character then backtrack
-                        if i < len(word) - 1:
-                            input_field.send_keys(word[i+1])
-                            time.sleep(random.uniform(0.1, 0.3))
-                            input_field.send_keys(Keys.BACK_SPACE)
-                            time.sleep(random.uniform(0.1, 0.2))
-                            input_field.send_keys(char)
-                            time.sleep(current_delay * 0.8)
-                    
-                    elif error_type == 'transpose':
-                        # Transpose current and next character, then correct
-                        if i < len(word) - 1:
-                            input_field.send_keys(word[i+1])
-                            time.sleep(current_delay * 0.5)
-                            input_field.send_keys(char)
-                            i += 1  # Skip the next character since we already typed it
-                            time.sleep(random.uniform(0.3, 0.6))  # Longer pause as we realize the error
-                            input_field.send_keys(Keys.BACK_SPACE)
-                            input_field.send_keys(Keys.BACK_SPACE)
-                            time.sleep(random.uniform(0.1, 0.3))
-                            input_field.send_keys(word[i-1])
-                            time.sleep(current_delay * 0.7)
-                            input_field.send_keys(word[i])
-                            time.sleep(current_delay * 0.7)
-                
-                # Occasional pauses mid-word (thinking or distraction)
-                if len(word) > 5 and i > 2 and i < len(word) - 2:
-                    if random.random() < 0.05:  # 5% chance of a pause
-                        time.sleep(random.uniform(0.3, 1.0))
-                
-                i += 1
+
+                if random.random() < 0.2:
+                    # Type a wrong character and delete it
+                    wrong_char = random.choice('abcdefghijklmnopqrstuvwxyz')
+                    input_field.send_keys(wrong_char)
+                    time.sleep(current_delay / 2)
+                    input_field.send_keys(Keys.BACK_SPACE)
+                    time.sleep(current_delay / 2)
             
-            # Pause before submitting - humans often re-read what they typed
-            review_time = random.uniform(0.2, 0.5) * (1 + word_complexity * 0.3)
-            time.sleep(review_time)
+            # Random delay before clicking submit (as humans do)
+            time.sleep(random.uniform(0.1, 0.3))
             
             # Click submit using a better selector
             submit_button = self.wait.until(EC.element_to_be_clickable(
                 (By.XPATH, "//button[text()='Enter']")
             ))
-            
-            # Sometimes we check what we typed again before clicking
-            if random.random() < 0.2:
-                time.sleep(random.uniform(0.2, 0.4))
-            
             self.driver.execute_script("arguments[0].click();", submit_button)
             
         except Exception as e:
             print(f"Error submitting word: {e}")
             raise e
-    
-    def _calculate_word_complexity(self, word):
-        """
-        Calculate a complexity score for a word (0.0 to 1.0)
-        Complex words have unusual letter combinations, are longer, or contain special characters
-        """
-        if not word:
-            return 0.0
-            
-        # Length factor - longer words are harder
-        length_factor = min(1.0, len(word) / 12)
-        
-        # Character complexity - special chars and unusual combinations
-        char_complexity = 0.0
-        unusual_chars = set('jxqzvw')
-        special_chars = set('!@#$%^&*()_+-=[]{}|;:\'",.<>/?\\')
-        
-        for char in word:
-            if char in unusual_chars:
-                char_complexity += 0.1
-            if char in special_chars:
-                char_complexity += 0.2
-            if char.isupper():
-                char_complexity += 0.05
-                
-        char_complexity = min(0.7, char_complexity)
-        
-        # Check for alternating hands (more complex to type)
-        left_hand = set('qwertasdfgzxcvb')
-        right_hand = set('yuiophjklnm')
-        hand_switches = 0
-        current_hand = None
-        
-        for char in word.lower():
-            if char in left_hand:
-                new_hand = 'left'
-            elif char in right_hand:
-                new_hand = 'right'
-            else:
-                continue
-                
-            if current_hand and new_hand != current_hand:
-                hand_switches += 1
-            current_hand = new_hand
-            
-        switch_factor = min(0.5, hand_switches / len(word) * 0.8)
-        
-        # Combine factors
-        return (length_factor * 0.4) + (char_complexity * 0.4) + (switch_factor * 0.2)
 
     def check_progress(self):
         """Check if hacking is complete"""
@@ -749,8 +572,8 @@ class HackerIOBot:
                     
                     # Randomize typing speed slightly based on word length
                     typing_delay = random.uniform(
-                        0.04 if is_npc else 0.06,  # Min delay
-                        0.08 if is_npc else 0.11   # Max delay
+                        0.12 if is_npc else 0.18,  # Min delay
+                        0.15 if is_npc else 0.22   # Max delay
                     )
                     
                     # Type the word with human-like timing
@@ -1010,7 +833,7 @@ class HackerIOBot:
                 print("Browser closed due to error")
 
     def simulate_human_mouse_movement(self, target_element):
-        """Simulate human-like mouse movement to a target element using Bezier curves"""
+        """Simulate human-like mouse movement to a target element"""
         try:
             # Get element position and size
             element_loc = target_element.location
@@ -1024,167 +847,51 @@ class HackerIOBot:
             viewport_width = self.driver.execute_script("return window.innerWidth;") or 1024
             viewport_height = self.driver.execute_script("return window.innerHeight;") or 768
             
-            # Get current mouse position or use a random position
-            current_mouse_pos = self.driver.execute_script(
-                "return [window.mouseX || 0, window.mouseY || 0];"
-            )
-            
-            if current_mouse_pos[0] == 0 and current_mouse_pos[1] == 0:
-                # Start from a semi-random position that makes sense (not edge of screen)
-                margin = min(viewport_width, viewport_height) * 0.2
-                start_x = random.randint(int(margin), int(viewport_width - margin))
-                start_y = random.randint(int(margin), int(viewport_height - margin))
-            else:
-                start_x, start_y = current_mouse_pos
+            # Start from a random position within viewport
+            start_x = random.randint(0, viewport_width)
+            start_y = random.randint(0, viewport_height)
             
             # Create action chain
             actions = ActionChains(self.driver)
             
-            # Decide if this movement should overshoot
-            should_overshoot = random.random() < 0.3  # 30% chance of overshooting
+            # Generate curve points
+            points = []
+            steps = random.randint(3, 5)  # Reduced number of steps
             
-            # Generate bezier curve points for more natural movement
-            points = self._generate_bezier_curve(
-                start_x, start_y, target_x, target_y, 
-                control_points=random.randint(2, 4),
-                should_overshoot=should_overshoot
-            )
+            # Calculate movement needed
+            delta_x = target_x - start_x
+            delta_y = target_y - start_y
             
-            # Execute movement with variable speeds and occasional pauses
-            prev_pause_idx = 0
-            for i, (x, y) in enumerate(points):
-                actions.move_by_offset(x - (start_x if i == 0 else points[i-1][0]), 
-                                      y - (start_y if i == 0 else points[i-1][1]))
+            for i in range(steps):
+                progress = i / steps
                 
-                # Random speed variations
-                if random.random() < 0.7:  # Normal speed
-                    pause_time = random.uniform(0.001, 0.003) * (1 + random.random() * 0.5)
-                else:  # Occasional slowdown
-                    pause_time = random.uniform(0.005, 0.02)
+                # Add curve using sine wave with smaller offsets
+                curve_x = delta_x * progress + math.sin(progress * math.pi) * random.randint(5, 15)
+                curve_y = delta_y * progress + math.sin(progress * math.pi) * random.randint(5, 15)
                 
-                # Occasional jerky movement or pause
-                if random.random() < 0.06 and (i - prev_pause_idx) > len(points) // 4:  # 6% chance
-                    pause_time = random.uniform(0.05, 0.15)  # Significant pause
-                    prev_pause_idx = i
-                    
-                    # Possible small jerk during pause
-                    if random.random() < 0.3:  # 30% chance to add jerk during pause
-                        jerk_x = random.randint(-5, 5)
-                        jerk_y = random.randint(-5, 5)
-                        actions.move_by_offset(jerk_x, jerk_y)
-                        actions.pause(0.01)
-                        actions.move_by_offset(-jerk_x, -jerk_y)  # Move back
-                
-                actions.pause(pause_time)
+                points.append((curve_x / steps, curve_y / steps))
             
-            # If overshooting, add correction movement
-            if should_overshoot:
-                # Pause at overshoot position
-                actions.pause(random.uniform(0.05, 0.15))
-                
-                # Calculate final adjustment to target
-                final_pos = points[-1]
-                actions.move_to_element(target_element)
-                actions.pause(random.uniform(0.05, 0.1))
+            # Execute movement
+            for (x, y) in points:
+                actions.move_by_offset(x, y)
+                actions.pause(random.uniform(0.01, 0.03))  # Shorter pauses
             
-            # Final small adjustment with slight delay
-            if random.random() < 0.5:  # Sometimes make a small final adjustment
-                small_adjust_x = random.randint(-3, 3)
-                small_adjust_y = random.randint(-3, 3)
-                actions.move_by_offset(small_adjust_x, small_adjust_y)
-                actions.pause(random.uniform(0.02, 0.08))
-                actions.move_to_element(target_element)
-            
-            # Execute the full action chain
+            # Final movement
+            actions.move_to_element(target_element)
+            actions.pause(0.1)
             actions.perform()
             
         except Exception as e:
             print(f"Error in mouse movement: {e}")
-            # More sophisticated fallback that doesn't instantly jump
+            # Fallback to direct movement
             try:
-                actions = ActionChains(self.driver)
-                # Still try to move somewhat naturally even in fallback
-                half_x = (target_element.location['x'] - self.driver.execute_script("return window.mouseX || 0;")) / 2
-                half_y = (target_element.location['y'] - self.driver.execute_script("return window.mouseY || 0;")) / 2
-                actions.move_by_offset(half_x, half_y)
-                actions.pause(random.uniform(0.05, 0.1))
-                actions.move_to_element(target_element)
-                actions.perform()
+                ActionChains(self.driver).move_to_element(target_element).click().perform()
             except:
-                print("Fallback to JavaScript click")
-                self.driver.execute_script("arguments[0].scrollIntoView(true); arguments[0].click();", target_element)
-                
-    def _generate_bezier_curve(self, start_x, start_y, end_x, end_y, control_points=2, should_overshoot=False):
-        """Generate points along a bezier curve with optional overshooting"""
-        # Calculate distance
-        distance = math.sqrt((end_x - start_x)**2 + (end_y - start_y)**2)
-        steps = max(10, min(50, int(distance / 10)))  # More steps for longer distances
-        
-        # Create control points for the bezier curve
-        points = [(start_x, start_y)]
-        
-        # Target point (may be overshooting)
-        if should_overshoot:
-            # Overshoot by 5-20% of the distance in the same direction
-            overshoot_factor = random.uniform(1.05, 1.2)
-            target_x = start_x + (end_x - start_x) * overshoot_factor
-            target_y = start_y + (end_y - start_y) * overshoot_factor
-        else:
-            target_x, target_y = end_x, end_y
-        
-        # Create semi-random control points
-        control_pts = []
-        for i in range(control_points):
-            # How far along the path this control point is (0 to 1)
-            progress = (i + 1) / (control_points + 1)
-            
-            # Calculate rough position along straight line
-            px = start_x + (target_x - start_x) * progress
-            py = start_y + (target_y - start_y) * progress
-            
-            # Add randomness perpendicular to motion direction
-            # Randomness is greater in the middle of the path
-            randomness = distance * 0.1 * math.sin(progress * math.pi)
-            
-            # Calculate perpendicular direction
-            if abs(target_x - start_x) < 1 and abs(target_y - start_y) < 1:
-                # Handle case when points are very close
-                perp_x, perp_y = 1, 0
-            else:
-                # Normal case: calculate perpendicular
-                dx, dy = target_x - start_x, target_y - start_y
-                length = math.sqrt(dx*dx + dy*dy)
-                perp_x, perp_y = -dy/length, dx/length
-            
-            # Apply perpendicular randomness
-            rand_factor = random.uniform(-randomness, randomness)
-            px += perp_x * rand_factor
-            py += perp_y * rand_factor
-            
-            control_pts.append((px, py))
-        
-        # Generate points along the bezier curve
-        curve_points = []
-        for t in range(steps + 1):
-            t_normalized = t / steps
-            
-            # De Casteljau's algorithm to compute point on bezier curve
-            # Start with the initial points
-            points_level = [(start_x, start_y)] + control_pts + [(target_x, target_y)]
-            
-            # Iteratively compute intermediate points
-            for level in range(len(points_level) - 1):
-                new_points = []
-                for i in range(len(points_level) - level - 1):
-                    x = (1 - t_normalized) * points_level[i][0] + t_normalized * points_level[i + 1][0]
-                    y = (1 - t_normalized) * points_level[i][1] + t_normalized * points_level[i + 1][1]
-                    new_points.append((x, y))
-                points_level = new_points
-            
-            # The final point is the point on the curve
-            curve_points.append(points_level[0])
-        
-        return curve_points
+                # Last resort: JavaScript click
+                try:
+                    self.driver.execute_script("arguments[0].click();", target_element)
+                except:
+                    pass
 
 if __name__ == "__main__":
     bot = HackerIOBot()
